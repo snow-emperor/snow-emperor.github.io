@@ -3,513 +3,913 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雪域之境 | 个人主页</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>TGI - GitHub Master</title>
     <style>
+        /* ==================== 全局重置与基础样式 ==================== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: linear-gradient(to bottom, #0a1a3a, #1a3a5f, #2a5a8f);
-            color: #e6f2ff;
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23a8d8ea" d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15.37 8.73C14.71 8.26 13.91 8 13 8C11.34 8 10 9.34 10 11C10 12.66 11.34 14 13 14C14.66 14 16 12.66 16 11C16 10.38 15.78 9.79 15.41 9.32L21 9Z"/></svg>'), auto;
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a; /* 深黑色背景 */
+            color: #00ffff; /* 青色文字 */
+            overflow-x: hidden; /* 防止横向滚动 */
+            cursor: auto;
         }
 
+        /* ==================== 背景粒子系统 ==================== */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* 置于最底层 */
+            opacity: 0.85; /* 透明度0.85 */
+        }
+
+        /* ==================== 主容器 ==================== */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
             position: relative;
-            z-index: 10;
+            z-index: 1; /* 确保内容在画布上方 */
         }
 
-        header {
-            text-align: center;
-            padding: 60px 20px 40px;
-            position: relative;
-        }
-
-        .profile {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 40px;
-        }
-
-        .avatar {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 25px rgba(173, 216, 230, 0.7);
-            background: linear-gradient(45deg, #a8d8ea, #c2e6ff);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            transition: transform 0.5s ease;
-        }
-
-        .avatar:hover {
-            transform: scale(1.05);
-        }
-
-        .avatar i {
-            font-size: 80px;
-            color: #4a7bb8;
-        }
-
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(173, 216, 230, 0.7);
-            letter-spacing: 2px;
-        }
-
-        .title {
-            font-size: 1.5rem;
-            color: #a8d8ea;
-            margin-bottom: 20px;
-            font-weight: 300;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .social-links a {
-            color: #c2e6ff;
-            font-size: 1.8rem;
-            transition: all 0.3s ease;
-        }
-
-        .social-links a:hover {
-            color: #fff;
-            transform: translateY(-5px);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-        }
-
-        .content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .card {
-            background: rgba(16, 42, 88, 0.6);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(173, 216, 230, 0.2);
-            backdrop-filter: blur(5px);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-10px);
-        }
-
-        .card h2 {
-            color: #a8d8ea;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(173, 216, 230, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card h2 i {
-            font-size: 1.5rem;
-        }
-
-        .skills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 15px;
-        }
-
-        .skill {
-            background: rgba(42, 90, 143, 0.7);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            border: 1px solid rgba(173, 216, 230, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .skill:hover {
-            background: rgba(42, 90, 143, 0.9);
-            transform: scale(1.05);
-        }
-
-        .project {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(173, 216, 230, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .project:hover {
-            transform: translateX(5px);
-        }
-
-        .project:last-child {
-            margin-bottom: 0;
-            border-bottom: none;
-        }
-
-        .project h3 {
-            color: #c2e6ff;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .project p {
-            font-size: 0.95rem;
-            line-height: 1.5;
-            color: #e6f2ff;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .stat {
-            padding: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .stat:hover {
-            transform: scale(1.1);
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #a8d8ea;
-            text-shadow: 0 0 10px rgba(173, 216, 230, 0.5);
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #c2e6ff;
-            margin-top: 5px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px 20px 20px;
-            margin-top: 60px;
-            color: #a8d8ea;
-            font-size: 0.9rem;
-            border-top: 1px solid rgba(173, 216, 230, 0.2);
-        }
-
-        /* 雪花样式 */
-        .snowflake {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.8;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        /* 雪花碎片样式 */
-        .snow-particle {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        .mountain {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 150px;
-            background: linear-gradient(to top, #0a1a3a, #1a3a5f);
-            clip-path: polygon(0% 100%, 10% 70%, 20% 90%, 30% 60%, 40% 80%, 50% 50%, 60% 70%, 70% 40%, 80% 60%, 90% 30%, 100% 50%, 100% 100%);
-            z-index: 2;
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .content {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            .title {
-                font-size: 1.2rem;
-            }
-        }
-
-        .click-instruction {
+        /* ==================== 加载动画 ==================== */
+        .loader {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(16, 42, 88, 0.7);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            z-index: 100;
-            border: 1px solid rgba(173, 216, 230, 0.3);
-            backdrop-filter: blur(5px);
-            animation: pulse 2s infinite;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000; /* 置于最顶层 */
+            transition: opacity 1s; /* 淡出动画1秒 */
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            pointer-events: none; /* 隐藏后不响应鼠标事件 */
+        }
+
+        .loader-text {
+            font-size: 3rem;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff; /* 青色发光效果 */
+            animation: pulse 1s ease-in-out infinite; /* 脉冲动画 */
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(168, 216, 234, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(168, 216, 234, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(168, 216, 234, 0); }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ==================== 头部区域 ==================== */
+        .hero {
+            height: 100vh; /* 占满视口高度 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* 旋转头像边框 */
+        .profile-wrapper {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .profile-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff); /* 紫-青-紫渐变 */
+            border-radius: 50%;
+            animation: rotate 3s linear infinite; /* 3秒线性旋转 */
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .profile-img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 5px solid #0a0a0a;
+            background: #1a1a1a;
+            display: block;
+        }
+
+        /* 打字机效果 */
+        .typewriter {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            height: 80px;
+            overflow: hidden;
+        }
+
+        .typewriter-text {
+            display: inline-block;
+            border-right: 3px solid #00ffff; /* 闪烁光标 */
+            white-space: nowrap; /* 不换行 */
+            overflow: hidden;
+        }
+
+        /* 链接按钮样式 */
+        .link-button {
+            display: inline-block;
+            padding: 15px 40px;
+            color: #00ffff;
+            text-decoration: none;
+            border: 1px solid #00ffff;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s; /* 悬停过渡 */
+            margin: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .link-button:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); /* 悬停发光 */
+        }
+
+        /* ==================== 技能进度条 ==================== */
+        .skills-section {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 50px;
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        .skill-item {
+            margin-bottom: 30px;
+        }
+
+        .skill-name {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .skill-bar {
+            height: 10px;
+            background: #1a1a1a;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #ff00ff, #00ffff); /* 进度条渐变 */
+            border-radius: 5px;
+            width: 0; /* 初始宽度0 */
+            transition: width 2s ease-in-out; /* 2秒动画 */
+            position: relative;
+        }
+
+        .skill-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite; /* 闪光动画 */
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ==================== 项目卡片 ==================== */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 50px 0;
+        }
+
+        .project-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px); /* 悬停上浮 */
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff);
+            border-radius: 10px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .project-card:hover::before {
+            opacity: 1; /* 悬停时显示彩色边框 */
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+            color: #00ffff;
+            margin-bottom: 15px;
+        }
+
+        .project-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        /* ==================== 时间线 ==================== */
+        .timeline {
+            position: relative;
+            padding: 50px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #ff00ff, #00ffff); /* 中轴线渐变 */
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 50px;
+            opacity: 0;
+            transform: translateX(-50px); /* 初始左移50px */
+            transition: all 0.6s; /* 0.6秒动画 */
+        }
+
+        .timeline-item.right {
+            transform: translateX(50px); /* 右侧项目初始右移 */
+        }
+
+        .timeline-item.show {
+            opacity: 1;
+            transform: translateX(0); /* 显示时归位 */
+        }
+
+        .timeline-content {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            width: 45%;
+            position: relative;
+            border: 1px solid #333;
+        }
+
+        .timeline-item.right .timeline-content {
+            margin-left: auto; /* 右侧项目靠右对齐 */
+        }
+
+        .timeline-dot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #00ffff;
+            border-radius: 50%;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px #00ffff; /* 发光点 */
+        }
+
+        /* ==================== 二进制雨背景 ==================== */
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 不响应鼠标事件 */
+            opacity: 0.1; /* 透明度0.1 */
+            z-index: -1;
+        }
+
+        /* ==================== 响应式设计 ==================== */
+        @media (max-width: 768px) {
+            .typewriter {
+                font-size: 2rem;
+                height: 50px;
+            }
+            
+            .timeline::before {
+                left: 30px; /* 移动端中轴线靠左 */
+            }
+            
+            .timeline-content {
+                width: calc(100% - 60px);
+                margin-left: 60px !important;
+            }
+            
+            .timeline-dot {
+                left: 30px; /* 移动端圆点靠左 */
+            }
         }
     </style>
 </head>
 <body>
-    <!-- 雪花容器 -->
-    <div id="snow-container"></div>
-    
-    <!-- 山脉 -->
-    <div class="mountain"></div>
-    
+    <!-- ==================== 加载动画层 ==================== -->
+    <div class="loader" id="loader">
+        <div class="loader-text">系统启动中...</div>
+    </div>
+
+    <!-- ==================== 背景粒子画布 ==================== -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- ==================== 二进制雨背景 ==================== -->
+    <canvas class="matrix-rain" id="matrix-rain"></canvas>
+
+    <!-- ==================== 主内容容器 ==================== -->
     <div class="container">
-        <header>
-            <div class="profile">
-                <div class="avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <h1>雪域之境</h1>
-                <p class="title">前端开发者 & 冰雪爱好者</p>
-                <p>热爱编码，享受在代码世界中创造美丽的事物，就像雪花一样独一无二</p>
-                
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-github"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
-                    <a href="#"><i class="fab fa-codepen"></i></a>
-                </div>
+        <!-- ==================== 头部展示区 ==================== -->
+        <section class="hero">
+            <div class="profile-wrapper">
+                <img src="https://github.com/snow-emperor.png" alt="TGI" class="profile-img">
             </div>
-        </header>
-        
-        <div class="content">
-            <div class="card">
-                <h2><i class="fas fa-user"></i> 关于我</h2>
-                <p>一名热爱前端开发的程序员，专注于创造优雅、高效的Web体验。喜欢探索新技术，享受解决问题的过程。</p>
-                <p>在闲暇时间，我喜欢登山、摄影和冬季运动，特别是滑雪。大自然中的雪景总能给我带来灵感。</p>
-                
-                <h2 style="margin-top: 30px;"><i class="fas fa-cogs"></i> 技能</h2>
-                <div class="skills">
-                    <div class="skill">HTML/CSS</div>
-                    <div class="skill">JavaScript</div>
-                    <div class="skill">React</div>
-                    <div class="skill">Vue.js</div>
-                    <div class="skill">Node.js</div>
-                    <div class="skill">UI/UX设计</div>
-                    <div class="skill">响应式设计</div>
-                    <div class="skill">Git</div>
+            
+            <div class="typewriter">
+                <div class="typewriter-text"></div>
+            </div>
+            
+            <p style="font-size: 1.5rem; margin-bottom: 30px; color: #ff00ff;">
+                代码艺术家 | 架构破坏者 | 赛博游民
+            </p>
+            
+            <div>
+                <a href="https://github.com/snow-emperor" class="link-button">GitHub</a>
+                <a href="profile.html" class="link-button">查看简介</a>
+            </div>
+        </section>
+
+        <!-- ==================== 技能展示区域 ==================== -->
+        <section class="skills-section">
+            <h2 class="section-title">核心能力</h2>
+            
+            <div class="skill-item">
+                <div class="skill-name">
+                    <span>架构设计</span>
+                    <span data-skill="95%">95%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" data-width="95%"></div>
                 </div>
             </div>
             
-            <div class="card">
-                <h2><i class="fas fa-snowflake"></i> 精选项目</h2>
-                
-                <div class="project">
-                    <h3><i class="fas fa-mountain"></i> 雪域视觉库</h3>
-                    <p>一个基于冬季主题的CSS框架，包含雪景、冰晶等UI组件，帮助开发者快速构建冬季风格的网站。</p>
+            <div class="skill-item">
+                <div class="skill-name">
+                    <span>代码质量</span>
+                    <span data-skill="90%">90%</span>
                 </div>
-                
-                <div class="project">
-                    <h3><i class="fas fa-wind"></i> 极光模拟器</h3>
-                    <p>使用Canvas和WebGL创建的极光模拟效果，能够根据用户交互实时变化，呈现出逼真的北极光效果。</p>
-                </div>
-                
-                <div class="project">
-                    <h3><i class="fas fa-igloo"></i> 冬季度假村网站</h3>
-                    <p>为高端滑雪度假村设计的响应式网站，包含预订系统、实时雪况和活动日历等功能。</p>
+                <div class="skill-bar">
+                    <div class="skill-progress" data-width="90%"></div>
                 </div>
             </div>
-        </div>
-        
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-value">50+</div>
-                <div class="stat-label">完成项目</div>
+            
+            <div class="skill-item">
+                <div class="skill-name">
+                    <span>性能优化</span>
+                    <span data-skill="85%">85%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" data-width="85%"></div>
+                </div>
             </div>
-            <div class="stat">
-                <div class="stat-value">5</div>
-                <div class="stat-label">工作年限</div>
+            
+            <div class="skill-item">
+                <div class="skill-name">
+                    <span>黑客技术</span>
+                    <span data-skill="99%">99%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" data-width="99%"></div>
+                </div>
             </div>
-            <div class="stat">
-                <div class="stat-value">99%</div>
-                <div class="stat-label">客户满意度</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">25</div>
-                <div class="stat-label">技术认证</div>
-            </div>
-        </div>
-        
-        <footer>
-            <p>© 2023 雪域之境 | 个人主页</p>
-            <p>灵感来自冰雪与代码的完美融合</p>
-        </footer>
-    </div>
+        </section>
 
-    <div class="click-instruction">
-        点击页面任意位置，雪花会破碎消散
+        <!-- ==================== 项目展示网格 ==================== -->
+        <section>
+            <h2 class="section-title">破坏性项目</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <h3 class="project-title">量子纠缠编译器</h3>
+                    <p>重新定义代码编译方式，让JavaScript运行在量子计算机上，性能提升1000倍。</p>
+                    <div class="project-stats">
+                        <span>⭐ 1.2k</span>
+                        <span>🔱 666</span>
+                        <span>🐛 0</span>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <h3 class="project-title">AI代码审查员</h3>
+                    <p>基于深度学习的自动化代码审查系统，能发现人类无法察觉的bug。</p>
+                    <div class="project-stats">
+                        <span>⭐ 2.3k</span>
+                        <span>🔱 888</span>
+                        <span>🐛 2</span>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <h3 class="project-title">宇宙级状态管理</h3>
+                    <p>比Redux快100倍的状态管理库，支持跨平行宇宙数据同步。</p>
+                    <div class="project-stats">
+                        <span>⭐ 3.6k</span>
+                        <span>🔱 1.2k</span>
+                        <span>🐛 0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 职业时间线 ==================== -->
+        <section class="timeline">
+            <h2 class="section-title">时间线</h2>
+            
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h3>2024 - 现在</h3>
+                    <p>成为GitHub传说级用户，星星收割机</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item right">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h3>2023</h3>
+                    <p>创造首个亿星项目，打破GitHub记录</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h3>2022</h3>
+                    <p>顿悟编程真谛，达到"人码合一"境界</p>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script>
-        // 创建雪花效果
-        function createSnowflakes() {
-            const snowContainer = document.getElementById('snow-container');
-            const snowflakeCount = 100;
+        // ==================== 全局变量 ====================
+        let mouseX = 0, mouseY = 0, isMouseDown = false;
+        let tempParticles = []; // 临时蛛网粒子数组
+        let lastMouseX = 0, lastMouseY = 0;
+        let mouseVelocity = 0; // 鼠标移动速度
+        let isShrinking = false; // 是否正在收缩
+        let animationTime = 0; // 动画时间
+
+        // ==================== 页面加载完成后隐藏加载动画(0.7秒) ====================
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 700);
+        });
+
+        // ==================== 鼠标事件监听 ====================
+        document.addEventListener('mousemove', (e) => {
+            // 记录鼠标位置，计算移动速度
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            const dx = mouseX - lastMouseX;
+            const dy = mouseY - lastMouseY;
+            mouseVelocity = Math.sqrt(dx * dx + dy * dy);
+        });
+
+        // ==================== 鼠标按下：生成三层蛛网 ====================
+        document.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            isShrinking = false;
+            e.preventDefault();
             
-            for (let i = 0; i < snowflakeCount; i++) {
-                const snowflake = document.createElement('div');
-                snowflake.classList.add('snowflake');
+            tempParticles = [];
+            
+            // 内层：8个粒子，保持圆形（半径25-30px）
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 * i) / 8; // 均匀分布在圆周上
+                const distance = 25 + Math.random() * 5; // 25-30px随机距离
+                createWebParticle(mouseX, mouseY, angle, distance, 0.4);
+            }
+            
+            // 中层：16个粒子（半径55-65px）
+            for (let i = 0; i < 16; i++) {
+                const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.2; // 添加随机偏移
+                const distance = 55 + Math.random() * 10;
+                createWebParticle(mouseX, mouseY, angle, distance, 0.6);
+            }
+            
+            // 外层：24个粒子（半径95-110px）
+            for (let i = 0; i < 24; i++) {
+                const angle = (Math.PI * 2 * i) / 24 + Math.random() * 0.15;
+                const distance = 95 + Math.random() * 15;
+                createWebParticle(mouseX, mouseY, angle, distance, 0.8);
+            }
+        });
+
+        /**
+         * 创建蛛网粒子
+         * @param {number} centerX - 中心X坐标
+         * @param {number} centerY - 中心Y坐标
+         * @param {number} angle - 角度（弧度）
+         * @param {number} distance - 目标距离
+         * @param {number} layerOffset - 层级偏移量（控制收缩速度）
+         */
+        function createWebParticle(centerX, centerY, angle, distance, layerOffset) {
+            tempParticles.push({
+                x: centerX + Math.cos(angle) * distance, // 初始X坐标
+                y: centerY + Math.sin(angle) * distance, // 初始Y坐标
+                baseAngle: angle, // 基础角度（用于排序和呼吸动画）
+                targetDistance: distance, // 目标距离（用于弹簧力）
+                size: Math.random() * 1.5, // 粒子大小（0-1.5px随机）
+                layer: layerOffset, // 层级（0.4, 0.6, 0.8）
+                vx: 0, vy: 0, // 速度（X, Y方向）
+                opacity: 1, // 不透明度
+                isExploding: false, // 是否正在爆散
+                damping: 0.90, // 阻尼系数（速度衰减率）
+                springK: 0.12, // 弹簧系数
+                angularVelocity: (Math.random() - 0.5) * 0.015 // 角速度（自动旋转）
+            });
+        }
+
+        // ==================== 鼠标释放：开始收缩 ====================
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            isShrinking = true;
+            setTimeout(() => {
+                tempParticles = [];
+                isShrinking = false;
+            }, 1500); // 1.5秒后完全清除粒子
+        });
+
+        // ==================== 粒子系统主循环 ====================
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const particles = [];
+        const particleCount = 60; // 背景粒子数量
+        
+        /**
+         * 背景粒子类
+         * 随机位置、随机速度、边界反弹
+         */
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.3; // X方向速度（-0.15到0.15）
+                this.vy = (Math.random() - 0.5) * 0.3; // Y方向速度（-0.15到0.15）
+                this.size = Math.random() * 1.5; // 粒子大小（0-1.5px）
+            }
+            
+            update() {
+                // 更新位置
+                this.x += this.vx;
+                this.y += this.vy;
                 
-                // 随机大小
-                const size = Math.random() * 5 + 3;
-                snowflake.style.width = `${size}px`;
-                snowflake.style.height = `${size}px`;
-                
-                // 随机位置
-                snowflake.style.left = `${Math.random() * 100}vw`;
-                
-                // 随机透明度
-                snowflake.style.opacity = Math.random() * 0.6 + 0.3;
-                
-                // 随机动画延迟和持续时间
-                const delay = Math.random() * 10;
-                const duration = Math.random() * 10 + 10;
-                
-                snowflake.style.animation = `fall ${duration}s linear ${delay}s infinite`;
-                
-                snowContainer.appendChild(snowflake);
+                // 边界反弹（碰到边界时速度反向并衰减）
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                // 绘制粒子
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.6)';
+                ctx.fill();
             }
         }
         
-        // 添加CSS动画
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fall {
-                0% {
-                    transform: translateY(-10px) translateX(0);
-                    opacity: 1;
-                }
-                100% {
-                    transform: translateY(100vh) translateX(20px);
-                    opacity: 0;
-                }
-            }
-            
-            @keyframes shatter {
-                0% {
-                    transform: translate(0, 0) scale(1);
-                    opacity: 1;
-                }
-                100% {
-                    transform: translate(var(--tx), var(--ty)) scale(0);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
+        // 初始化背景粒子
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
         
-        // 初始化雪花
-        document.addEventListener('DOMContentLoaded', createSnowflakes);
-        
-        // 雪花破碎效果
-        document.addEventListener('click', function(e) {
-            const snowflakes = document.querySelectorAll('.snowflake');
+        /**
+         * 动画循环函数
+         * 每帧更新和绘制所有粒子
+         */
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空画布
+            animationTime += 0.016; // 增加动画时间（约60fps）
             
-            snowflakes.forEach(snowflake => {
-                // 计算雪花与点击位置的距离
-                const rect = snowflake.getBoundingClientRect();
-                const snowflakeX = rect.left + rect.width / 2;
-                const snowflakeY = rect.top + rect.height / 2;
-                
-                const distance = Math.sqrt(
-                    Math.pow(e.clientX - snowflakeX, 2) + 
-                    Math.pow(e.clientY - snowflakeY, 2)
-                );
-                
-                // 如果点击位置在雪花附近，则破碎
-                if (distance < 100) {
-                    // 创建碎片
-                    createShatterEffect(snowflakeX, snowflakeY, snowflake);
+            // 绘制背景粒子
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            // 绘制背景粒子连线（距离<120px时连线）
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
                     
-                    // 移除原雪花
-                    snowflake.remove();
+                    // 距离越近线条越亮
+                    if (distance < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(0, 255, 255, ${0.4 * (1 - distance / 120)})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+                    }
+                });
+            });
+            
+            // ==================== 绘制蛛网 ====================
+            if (tempParticles.length > 0) {
+                // 自动呼吸动画（按下鼠标时）
+                if (!isShrinking && isMouseDown) {
+                    tempParticles.forEach(p => {
+                        // 基于时间和角度的正弦波呼吸效果
+                        const breathe = Math.sin(animationTime * 1.8 + p.baseAngle * 2) * 0.18 + 1;
+                        const currentTarget = p.targetDistance * breathe;
+                        
+                        p.baseAngle += p.angularVelocity; // 更新基础角度（旋转）
+                        
+                        const dx = mouseX - p.x;
+                        const dy = mouseY - p.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        // 弹簧力：将粒子拉向目标距离
+                        if (distance > 0.1) {
+                            const force = (distance - currentTarget) * p.springK * 0.25;
+                            p.vx += (dx / distance) * force;
+                            p.vy += (dy / distance) * force;
+                        }
+                        
+                        // 鼠标快速移动时添加扰动
+                        if (mouseVelocity > 3) {
+                            p.vx += (Math.random() - 0.5) * mouseVelocity * 0.08;
+                            p.vy += (Math.random() - 0.5) * mouseVelocity * 0.08;
+                        }
+                    });
+                }
+                
+                // 收缩动画（释放鼠标后）
+                if (isShrinking) {
+                    tempParticles.forEach(p => {
+                        // 各层以不同速度收缩（内层最慢）
+                        p.targetDistance *= (0.82 + p.layer * 0.04);
+                        p.size *= 0.96; // 尺寸也缩小
+                        
+                        const dx = mouseX - p.x;
+                        const dy = mouseY - p.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        // 距离中心<6px时开始淡出
+                        if (distance < 6) {
+                            p.opacity -= 0.03;
+                        }
+                        
+                        // 弹簧力拉向鼠标中心
+                        if (distance > 0.1) {
+                            const force = (distance - p.targetDistance) * p.springK;
+                            p.vx += (dx / distance) * force;
+                            p.vy += (dy / distance) * force;
+                        }
+                    });
+                }
+                
+                // 绘制连线（与背景风格一致）
+                if (isMouseDown && !isShrinking) {
+                    // 粒子到鼠标的连线（距离衰减透明度）
+                    tempParticles.forEach(p => {
+                        const dx = mouseX - p.x;
+                        const dy = mouseY - p.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        ctx.globalAlpha = p.opacity * (0.6 * (1 - Math.min(distance / 150, 0.7)));
+                        ctx.beginPath();
+                        ctx.moveTo(mouseX, mouseY);
+                        ctx.lineTo(p.x, p.y);
+                        ctx.strokeStyle = '#00ffff';
+                        ctx.lineWidth = 0.8; // 统一线条粗细
+                        ctx.stroke();
+                    });
+                    
+                    // 相邻粒子连线（模拟蛛网环形结构）
+                    const sortedParticles = [...tempParticles].sort((a, b) => a.baseAngle - b.baseAngle);
+                    for (let i = 0; i < sortedParticles.length; i++) {
+                        const p1 = sortedParticles[i];
+                        const p2 = sortedParticles[(i + 1) % sortedParticles.length];
+                        
+                        const dx = p1.x - p2.x;
+                        const dy = p1.y - p2.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        // 距离<110px时才连线
+                        if (distance < 110) {
+                            ctx.globalAlpha = (p1.opacity + p2.opacity) / 2 * (1 - distance / 110) * 0.7;
+                            ctx.beginPath();
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = '#00ffff';
+                            ctx.lineWidth = 0.8; // 统一线条粗细
+                            ctx.stroke();
+                        }
+                    }
+                }
+                
+                // 更新粒子位置和速度
+                for (let i = tempParticles.length - 1; i >= 0; i--) {
+                    const p = tempParticles[i];
+                    p.x += p.vx; // 应用X方向速度
+                    p.y += p.vy; // 应用Y方向速度
+                    p.vx *= p.damping; // 速度阻尼衰减
+                    p.vy *= p.damping;
+                    
+                    // 边界约束
+                    if (p.x < 0) { p.x = 0; p.vx *= -0.3; } // 碰到左边界反弹并衰减
+                    if (p.x > canvas.width) { p.x = canvas.width; p.vx *= -0.3; } // 右边界
+                    if (p.y < 0) { p.y = 0; p.vy *= -0.3; } // 上边界
+                    if (p.y > canvas.height) { p.y = canvas.height; p.vy *= -0.3; } // 下边界
+                    
+                    // 不透明度<=0时移除粒子
+                    if (p.opacity <= 0) {
+                        tempParticles.splice(i, 1);
+                    }
+                }
+                
+                // 绘制粒子（与背景完全相同）
+                tempParticles.forEach(p => {
+                    ctx.globalAlpha = p.opacity * 0.85;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+                    ctx.fill();
+                });
+                
+                ctx.globalAlpha = 1; // 重置透明度
+            }
+            
+            requestAnimationFrame(animateParticles); // 请求下一帧
+        }
+        animateParticles(); // 启动动画循环
+        
+        // ==================== 窗口调整 ====================
+        window.addEventListener('resize', () => {
+            // 重新设置画布尺寸
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+        });
+
+        // ==================== 二进制雨效果 ====================
+        const matrixCanvas = document.getElementById('matrix-rain');
+        const matrixCtx = matrixCanvas.getContext('2d');
+        matrixCanvas.width = window.innerWidth;
+        matrixCanvas.height = window.innerHeight;
+        
+        const matrixChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        const fontSize = 14;
+        const columns = matrixCanvas.width / fontSize;
+        const drops = [];
+        
+        // 初始化每列的起始位置
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+        
+        /**
+         * 绘制二进制雨
+         * 雨滴下落效果
+         */
+        function drawMatrix() {
+            matrixCtx.fillStyle = 'rgba(10, 10, 10, 0.05)'; // 半透明覆盖（拖尾效果）
+            matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+            
+            matrixCtx.fillStyle = '#0ff'; // 青色字符
+            matrixCtx.font = fontSize + 'px monospace';
+            
+            // 遍历每列
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                matrixCtx.fillText(text, i * fontSize, drops[i] * fontSize); // 绘制字符
+                
+                // 随机重置到顶部（模拟新雨滴）
+                if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++; // Y坐标下移
+            }
+        }
+        
+        setInterval(drawMatrix, 35); // 每35ms绘制一次
+
+        // ==================== 技能条动画观察器 ====================
+        const observerOptions = { threshold: 0.5, rootMargin: '0px' };
+        
+        /**
+         * 技能条观察器
+         * 当技能条进入视口时触发动画
+         */
+        const skillObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const progressBar = entry.target.querySelector('.skill-progress');
+                    const width = progressBar.getAttribute('data-width');
+                    progressBar.style.width = width; // 设置目标宽度（触发CSS动画）
                 }
             });
-        });
+        }, observerOptions);
         
-        function createShatterEffect(x, y, originalSnowflake) {
-            const particleCount = 8;
-            const container = document.getElementById('snow-container');
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('snow-particle');
-                
-                // 继承原雪花的大小和颜色
-                particle.style.width = originalSnowflake.style.width;
-                particle.style.height = originalSnowflake.style.height;
-                particle.style.background = originalSnowflake.style.background;
-                particle.style.opacity = originalSnowflake.style.opacity;
-                
-                // 设置初始位置
-                particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
-                
-                // 随机方向
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 20 + Math.random() * 50;
-                const tx = Math.cos(angle) * distance;
-                const ty = Math.sin(angle) * distance;
-                
-                particle.style.setProperty('--tx', `${tx}px`);
-                particle.style.setProperty('--ty', `${ty}px`);
-                
-                // 添加破碎动画
-                particle.style.animation = `shatter 0.8s ease-out forwards`;
-                
-                container.appendChild(particle);
-                
-                // 动画结束后移除碎片
-                setTimeout(() => {
-                    if (particle.parentNode) {
-                        particle.parentNode.removeChild(particle);
-                    }
-                }, 800);
+        // 观察所有技能条
+        document.querySelectorAll('.skill-item').forEach(item => {
+            skillObserver.observe(item);
+        });
+
+        // ==================== 时间线动画观察器 ====================
+        const timelineObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show'); // 添加显示类（触发CSS动画）
+                }
+            });
+        }, observerOptions);
+        
+        // 观察所有时间线项目
+        document.querySelectorAll('.timeline-item').forEach(item => {
+            timelineObserver.observe(item);
+        });
+
+        // ==================== 打字机效果 ====================
+        const typewriterText = document.querySelector('.typewriter-text');
+        const text = 'T.G.I.';
+        let index = 0;
+        
+        /**
+         * 打字机效果函数
+         * 逐字显示文本
+         */
+        function typeWriter() {
+            if (index < text.length) {
+                typewriterText.textContent += text.charAt(index);
+                index++;
+                setTimeout(typeWriter, 200); // 每个字符间隔200ms
             }
         }
+        
+        // 延迟1秒开始打字
+        setTimeout(typeWriter, 1000);
     </script>
 </body>
 </html>
