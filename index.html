@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雪域之境 | 个人主页</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #0a1a3a, #1a3a5f, #2a5a8f);
+            color: #e6f2ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23a8d8ea" d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15.37 8.73C14.71 8.26 13.91 8 13 8C11.34 8 10 9.34 10 11C10 12.66 11.34 14 13 14C14.66 14 16 12.66 16 11C16 10.38 15.78 9.79 15.41 9.32L21 9Z"/></svg>'), auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative;
+        }
+
+        .profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .avatar {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 25px rgba(173, 216, 230, 0.7);
+            background: linear-gradient(45deg, #a8d8ea, #c2e6ff);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: transform 0.5s ease;
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .avatar i {
+            font-size: 80px;
+            color: #4a7bb8;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(173, 216, 230, 0.7);
+            letter-spacing: 2px;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            color: #a8d8ea;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            color: #c2e6ff;
+            font-size: 1.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: #fff;
+            transform: translateY(-5px);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: rgba(16, 42, 88, 0.6);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(173, 216, 230, 0.2);
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card h2 {
+            color: #a8d8ea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(173, 216, 230, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 i {
+            font-size: 1.5rem;
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .skill {
+            background: rgba(42, 90, 143, 0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(173, 216, 230, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .skill:hover {
+            background: rgba(42, 90, 143, 0.9);
+            transform: scale(1.05);
+        }
+
+        .project {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(173, 216, 230, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .project:hover {
+            transform: translateX(5px);
+        }
+
+        .project:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        .project h3 {
+            color: #c2e6ff;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .project p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #e6f2ff;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .stat {
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .stat:hover {
+            transform: scale(1.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #a8d8ea;
+            text-shadow: 0 0 10px rgba(173, 216, 230, 0.5);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #c2e6ff;
+            margin-top: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px 20px;
+            margin-top: 60px;
+            color: #a8d8ea;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(173, 216, 230, 0.2);
+        }
+
+        /* 雪花样式 */
+        .snowflake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* 雪花碎片样式 */
+        .snow-particle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(to top, #0a1a3a, #1a3a5f);
+            clip-path: polygon(0% 100%, 10% 70%, 20% 90%, 30% 60%, 40% 80%, 50% 50%, 60% 70%, 70% 40%, 80% 60%, 90% 30%, 100% 50%, 100% 100%);
+            z-index: 2;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .title {
+                font-size: 1.2rem;
+            }
+        }
+
+        .click-instruction {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(16, 42, 88, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 100;
+            border: 1px solid rgba(173, 216, 230, 0.3);
+            backdrop-filter: blur(5px);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(168, 216, 234, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(168, 216, 234, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(168, 216, 234, 0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 雪花容器 -->
+    <div id="snow-container"></div>
+    
+    <!-- 山脉 -->
+    <div class="mountain"></div>
+    
+    <div class="container">
+        <header>
+            <div class="profile">
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h1>雪域之境</h1>
+                <p class="title">前端开发者 & 冰雪爱好者</p>
+                <p>热爱编码，享受在代码世界中创造美丽的事物，就像雪花一样独一无二</p>
+                
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-codepen"></i></a>
+                </div>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="card">
+                <h2><i class="fas fa-user"></i> 关于我</h2>
+                <p>一名热爱前端开发的程序员，专注于创造优雅、高效的Web体验。喜欢探索新技术，享受解决问题的过程。</p>
+                <p>在闲暇时间，我喜欢登山、摄影和冬季运动，特别是滑雪。大自然中的雪景总能给我带来灵感。</p>
+                
+                <h2 style="margin-top: 30px;"><i class="fas fa-cogs"></i> 技能</h2>
+                <div class="skills">
+                    <div class="skill">HTML/CSS</div>
+                    <div class="skill">JavaScript</div>
+                    <div class="skill">React</div>
+                    <div class="skill">Vue.js</div>
+                    <div class="skill">Node.js</div>
+                    <div class="skill">UI/UX设计</div>
+                    <div class="skill">响应式设计</div>
+                    <div class="skill">Git</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-snowflake"></i> 精选项目</h2>
+                
+                <div class="project">
+                    <h3><i class="fas fa-mountain"></i> 雪域视觉库</h3>
+                    <p>一个基于冬季主题的CSS框架，包含雪景、冰晶等UI组件，帮助开发者快速构建冬季风格的网站。</p>
+                </div>
+                
+                <div class="project">
+                    <h3><i class="fas fa-wind"></i> 极光模拟器</h3>
+                    <p>使用Canvas和WebGL创建的极光模拟效果，能够根据用户交互实时变化，呈现出逼真的北极光效果。</p>
+                </div>
+                
+                <div class="project">
+                    <h3><i class="fas fa-igloo"></i> 冬季度假村网站</h3>
+                    <p>为高端滑雪度假村设计的响应式网站，包含预订系统、实时雪况和活动日历等功能。</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">50+</div>
+                <div class="stat-label">完成项目</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">5</div>
+                <div class="stat-label">工作年限</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">99%</div>
+                <div class="stat-label">客户满意度</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">25</div>
+                <div class="stat-label">技术认证</div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 雪域之境 | 个人主页</p>
+            <p>灵感来自冰雪与代码的完美融合</p>
+        </footer>
+    </div>
+
+    <div class="click-instruction">
+        点击页面任意位置，雪花会破碎消散
+    </div>
+
+    <script>
+        // 创建雪花效果
+        function createSnowflakes() {
+            const snowContainer = document.getElementById('snow-container');
+            const snowflakeCount = 100;
+            
+            for (let i = 0; i < snowflakeCount; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                
+                // 随机大小
+                const size = Math.random() * 5 + 3;
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                
+                // 随机位置
+                snowflake.style.left = `${Math.random() * 100}vw`;
+                
+                // 随机透明度
+                snowflake.style.opacity = Math.random() * 0.6 + 0.3;
+                
+                // 随机动画延迟和持续时间
+                const delay = Math.random() * 10;
+                const duration = Math.random() * 10 + 10;
+                
+                snowflake.style.animation = `fall ${duration}s linear ${delay}s infinite`;
+                
+                snowContainer.appendChild(snowflake);
+            }
+        }
+        
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                0% {
+                    transform: translateY(-10px) translateX(0);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) translateX(20px);
+                    opacity: 0;
+                }
+            }
+            
+            @keyframes shatter {
+                0% {
+                    transform: translate(0, 0) scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translate(var(--tx), var(--ty)) scale(0);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 初始化雪花
+        document.addEventListener('DOMContentLoaded', createSnowflakes);
+        
+        // 雪花破碎效果
+        document.addEventListener('click', function(e) {
+            const snowflakes = document.querySelectorAll('.snowflake');
+            
+            snowflakes.forEach(snowflake => {
+                // 计算雪花与点击位置的距离
+                const rect = snowflake.getBoundingClientRect();
+                const snowflakeX = rect.left + rect.width / 2;
+                const snowflakeY = rect.top + rect.height / 2;
+                
+                const distance = Math.sqrt(
+                    Math.pow(e.clientX - snowflakeX, 2) + 
+                    Math.pow(e.clientY - snowflakeY, 2)
+                );
+                
+                // 如果点击位置在雪花附近，则破碎
+                if (distance < 100) {
+                    // 创建碎片
+                    createShatterEffect(snowflakeX, snowflakeY, snowflake);
+                    
+                    // 移除原雪花
+                    snowflake.remove();
+                }
+            });
+        });
+        
+        function createShatterEffect(x, y, originalSnowflake) {
+            const particleCount = 8;
+            const container = document.getElementById('snow-container');
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('snow-particle');
+                
+                // 继承原雪花的大小和颜色
+                particle.style.width = originalSnowflake.style.width;
+                particle.style.height = originalSnowflake.style.height;
+                particle.style.background = originalSnowflake.style.background;
+                particle.style.opacity = originalSnowflake.style.opacity;
+                
+                // 设置初始位置
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                // 随机方向
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 20 + Math.random() * 50;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                
+                // 添加破碎动画
+                particle.style.animation = `shatter 0.8s ease-out forwards`;
+                
+                container.appendChild(particle);
+                
+                // 动画结束后移除碎片
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 800);
+            }
+        }
+    </script>
+</body>
+</html>
