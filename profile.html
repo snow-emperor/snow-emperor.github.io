@@ -2,11 +2,291 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=https://cybermap.kaspersky.com/cn">
-    <title>正在跳转...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡巴斯基网络威胁地图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c1a2c 0%, #152642 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            padding: 40px;
+            background: rgba(16, 31, 53, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(64, 156, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(64, 156, 255, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        .logo {
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(90deg, #4a9cff, #6bc2ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .logo p {
+            color: #8fa3c7;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .threat-visualization {
+            width: 100%;
+            height: 200px;
+            background: rgba(10, 20, 35, 0.7);
+            border-radius: 12px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(64, 156, 255, 0.3);
+        }
+        
+        .globe {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #1a3a5f, #0c1a2c);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 30px rgba(64, 156, 255, 0.3);
+        }
+        
+        .threat-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4757;
+            animation: pulse 2s infinite;
+        }
+        
+        .threat-dot:nth-child(2) {
+            top: 30%;
+            left: 25%;
+            background: #ffa502;
+            animation-delay: 0.5s;
+        }
+        
+        .threat-dot:nth-child(3) {
+            top: 60%;
+            left: 70%;
+            background: #2ed573;
+            animation-delay: 1s;
+        }
+        
+        .threat-dot:nth-child(4) {
+            top: 40%;
+            left: 60%;
+            background: #ff4757;
+            animation-delay: 1.5s;
+        }
+        
+        .threat-dot:nth-child(5) {
+            top: 70%;
+            left: 40%;
+            background: #ffa502;
+            animation-delay: 0.8s;
+        }
+        
+        .threat-dot:nth-child(6) {
+            top: 20%;
+            left: 50%;
+            background: #2ed573;
+            animation-delay: 0.3s;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            70% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+        
+        .connection-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(64, 156, 255, 0.7), transparent);
+            transform-origin: left center;
+        }
+        
+        .description {
+            margin: 25px 0;
+            font-size: 1.1rem;
+            color: #b8c7e0;
+            line-height: 1.7;
+        }
+        
+        .redirect-btn {
+            display: inline-block;
+            background: linear-gradient(90deg, #2a6bc9, #3a8cff);
+            color: white;
+            padding: 14px 36px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(42, 107, 201, 0.4);
+            margin: 20px 0;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .redirect-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(42, 107, 201, 0.6);
+            background: linear-gradient(90deg, #3a7bd5, #4a9cff);
+        }
+        
+        .redirect-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .security-tips {
+            background: rgba(20, 38, 64, 0.6);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: left;
+            border-left: 4px solid #3a8cff;
+        }
+        
+        .security-tips h3 {
+            color: #6bc2ff;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .security-tips ul {
+            list-style-type: none;
+        }
+        
+        .security-tips li {
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .security-tips li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #2ed573;
+            font-weight: bold;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            color: #8fa3c7;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px 20px;
+            }
+            
+            .logo h1 {
+                font-size: 2.2rem;
+            }
+            
+            .threat-visualization {
+                height: 150px;
+            }
+            
+            .description {
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <p>正在跳转到卡巴斯基网络威胁地图...</p>
-    <p>如果页面没有自动跳转，请点击 <a href="https://cybermap.kaspersky.com/cn">这里</a>。</p>
+    <div class="container">
+        <div class="logo">
+            <h1>卡巴斯基网络威胁地图</h1>
+            <p>全球网络安全威胁实时监控</p>
+        </div>
+        
+        <div class="threat-visualization">
+            <div class="globe"></div>
+            <div class="threat-dot"></div>
+            <div class="threat-dot"></div>
+            <div class="threat-dot"></div>
+            <div class="threat-dot"></div>
+            <div class="threat-dot"></div>
+            <div class="threat-dot"></div>
+        </div>
+        
+        <div class="description">
+            <p>卡巴斯基网络威胁地图实时展示全球范围内的网络安全威胁活动，包括恶意软件攻击、网络钓鱼、僵尸网络活动等。</p>
+            <p>通过可视化界面，您可以直观了解当前网络威胁的分布情况和攻击趋势。</p>
+        </div>
+        
+        <a href="https://cybermap.kaspersky.com/cn" class="redirect-btn">查看实时威胁地图</a>
+        
+        <div class="security-tips">
+            <h3>网络安全小贴士</h3>
+            <ul>
+                <li>定期更新操作系统和软件补丁</li>
+                <li>使用强密码并启用双重验证</li>
+                <li>谨慎点击不明链接和附件</li>
+                <li>安装并保持安全软件更新</li>
+                <li>定期备份重要数据</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 卡巴斯基实验室 | 提供专业网络安全解决方案</p>
+        </div>
+    </div>
 </body>
 </html>
