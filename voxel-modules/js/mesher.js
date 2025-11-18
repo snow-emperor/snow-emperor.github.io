@@ -16,13 +16,19 @@ function getAtlasTex() {
     // 确保元素存在且有color属性
     if (ELEMENTS[i] && ELEMENTS[i].color !== undefined) {
       ctx.fillStyle = `#${ELEMENTS[i].color.toString(16).padStart(6, '0')}`;
-      ctx.fillRect(x, y, 32, 32);
-      ctx.strokeStyle = '#000'; ctx.strokeRect(x, y, 32, 32);
-      ctx.fillStyle = '#fff'; ctx.font = '10px sans'; ctx.fillText(ELEMENTS[i].symbol, x + 4, y + 12);
     } else {
       // 默认颜色
       ctx.fillStyle = '#808080';
-      ctx.fillRect(x, y, 32, 32);
+    }
+    ctx.fillRect(x, y, 32, 32);
+    ctx.strokeStyle = '#000'; 
+    ctx.strokeRect(x, y, 32, 32);
+    
+    // 绘制元素符号
+    if (ELEMENTS[i] && ELEMENTS[i].symbol) {
+      ctx.fillStyle = '#fff'; 
+      ctx.font = '10px sans'; 
+      ctx.fillText(ELEMENTS[i].symbol, x + 4, y + 12);
     }
   }
   atlasTex = new THREE.CanvasTexture(can);

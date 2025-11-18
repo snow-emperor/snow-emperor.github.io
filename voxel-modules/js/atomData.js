@@ -62,5 +62,3 @@ export const SYM2ID = {};
 for (let i = 0; i < ELEMENTS.length; i++) {
   SYM2ID[ELEMENTS[i].symbol] = i;
 }
-
-export const ID2SYM = ELEMENTS.map(e=>e.symbol);
