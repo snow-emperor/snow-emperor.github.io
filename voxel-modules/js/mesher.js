@@ -13,10 +13,17 @@ function getAtlasTex() {
   const ctx = can.getContext('2d');
   for (let i = 0; i < 118; i++) {
     const x = (i % 8) * 32, y = Math.floor(i / 8) * 32;
-    ctx.fillStyle = `#${ELEMENTS[i].color.toString(16).padStart(6, '0')}`;
-    ctx.fillRect(x, y, 32, 32);
-    ctx.strokeStyle = '#000'; ctx.strokeRect(x, y, 32, 32);
-    ctx.fillStyle = '#fff'; ctx.font = '10px sans'; ctx.fillText(ELEMENTS[i].symbol, x + 4, y + 12);
+    // 确保元素存在且有color属性
+    if (ELEMENTS[i] && ELEMENTS[i].color !== undefined) {
+      ctx.fillStyle = `#${ELEMENTS[i].color.toString(16).padStart(6, '0')}`;
+      ctx.fillRect(x, y, 32, 32);
+      ctx.strokeStyle = '#000'; ctx.strokeRect(x, y, 32, 32);
+      ctx.fillStyle = '#fff'; ctx.font = '10px sans'; ctx.fillText(ELEMENTS[i].symbol, x + 4, y + 12);
+    } else {
+      // 默认颜色
+      ctx.fillStyle = '#808080';
+      ctx.fillRect(x, y, 32, 32);
+    }
   }
   atlasTex = new THREE.CanvasTexture(can);
   atlasTex.magFilter = THREE.NearestFilter;
@@ -37,7 +44,7 @@ function getColorForId(id) {
     return 0x888888; // 默认颜色
   }
   // 原子ID
-  if (id < ELEMENTS.length) {
+  if (id < ELEMENTS.length && ELEMENTS[id] && ELEMENTS[id].color !== undefined) {
     return ELEMENTS[id].color;
   }
   return 0x000000;

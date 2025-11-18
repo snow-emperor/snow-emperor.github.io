@@ -187,4 +187,25 @@ export class ChunkMgr {
     if (!(id & 0x8000)) return null;
     return id & 0x7FFF;
   }
+  
+  // 获取世界数据用于保存
+  getData() {
+    return {
+      // 当前版本中我们只保存基本设置，因为区块是程序生成的
+      chunkSize: CS,
+      renderDist: RENDER_DIST
+    };
+  }
+  
+  // 从保存的数据恢复世界状态
+  setData(data) {
+    // 区块是程序生成的，所以我们不需要恢复它们
+    // 但我们可以根据保存的数据调整设置
+    if (data.chunkSize) {
+      // 可以根据需要调整区块大小
+    }
+    if (data.renderDist) {
+      // 可以根据需要调整渲染距离
+    }
+  }
 }

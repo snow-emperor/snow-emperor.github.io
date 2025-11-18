@@ -231,4 +231,34 @@ export class Player {
     
     document.getElementById('mode').textContent = modeText;
   }
+  
+  // 获取玩家数据用于保存
+  getData() {
+    return {
+      position: {
+        x: this.position.x,
+        y: this.position.y,
+        z: this.position.z
+      },
+      hp: this.hp,
+      food: this.food,
+      rad: this.rad,
+      energy: this.energy,
+      mode: this.mode,
+      difficulty: this.difficulty
+    };
+  }
+  
+  // 从保存的数据恢复玩家状态
+  setData(data) {
+    if (data.position) {
+      this.position.set(data.position.x, data.position.y, data.position.z);
+    }
+    if (data.hp !== undefined) this.hp = data.hp;
+    if (data.food !== undefined) this.food = data.food;
+    if (data.rad !== undefined) this.rad = data.rad;
+    if (data.energy !== undefined) this.energy = data.energy;
+    if (data.mode) this.mode = data.mode;
+    if (data.difficulty) this.difficulty = data.difficulty;
+  }
 }

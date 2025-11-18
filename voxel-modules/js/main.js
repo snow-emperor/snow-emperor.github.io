@@ -4,6 +4,7 @@ import { Player } from './player.js';
 import { showMainMenu } from './ui/mainMenu.js';
 import { showHUD, updateFPS } from './ui/hud.js';
 import { initNuclear, updateNuclear } from './reactions/nuclear.js';
+import { saveManager } from './saveManager.js';
 
 export const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x87ceeb, 50, 300);
@@ -21,10 +22,12 @@ dirLight.position.set(1, 1, 1);
 scene.add(dirLight, new THREE.AmbientLight(0xffffff, 0.4));
 
 let chunkMgr, player;
+let gameConfig = null;
 
 export function startGame(config) {
   console.log('开始游戏，配置:', config);
   try {
+    gameConfig = config;
     const uiContainer = document.getElementById('ui-container');
     if (uiContainer) {
       uiContainer.style.display = 'none';
@@ -46,6 +49,102 @@ export function startGame(config) {
     }
     showMainMenu();
     alert('启动游戏失败: ' + e.message);
+  }
+}
+
+// 保存游戏
+export function saveGame(saveName) {
+  if (!chunkMgr || !player) {
+    console.error('游戏未启动，无法保存');
+    return false;
+  }
+  
+  try {
+    // 收集游戏数据
+    const worldData = {
+      seed: gameConfig ? gameConfig.seed : 12345,
+      mode: player.mode,
+      difficulty: player.difficulty
+    };
+    
+    const playerData = {
+      position: {
+        x: player.position.x,
+        y: player.position.y,
+        z: player.position.z
+      },
+      hp: player.hp,
+      food: player.food,
+      rad: player.rad,
+      energy: player.energy,
+      mode: player.mode,
+      difficulty: player.difficulty
+    };
+    
+    // 保存游戏
+    const success = saveManager.saveGame(saveName, worldData, playerData);
+    if (success) {
+      // 显示保存成功提示
+      const indicator = document.getElementById('save-indicator');
+      if (indicator) {
+        indicator.style.display = 'block';
+        setTimeout(() => {
+          indicator.style.display = 'none';
+        }, 2000);
+      }
+    }
+    return success;
+  } catch (e) {
+    console.error('保存游戏失败:', e);
+    return false;
+  }
+}
+
+// 加载游戏
+export function loadGame(saveName) {
+  try {
+    const saveData = saveManager.loadGame(saveName);
+    if (!saveData) {
+      console.error('无法加载存档:', saveName);
+      return false;
+    }
+    
+    // 使用保存的数据启动游戏
+    const config = {
+      name: saveData.name,
+      seed: saveData.world.seed,
+      mode: saveData.world.mode,
+      difficulty: saveData.world.difficulty
+    };
+    
+    startGame(config);
+    
+    // 恢复玩家数据（在游戏启动后）
+    setTimeout(() => {
+      if (player && saveData.player) {
+        // 恢复玩家属性
+        player.hp = saveData.player.hp;
+        player.food = saveData.player.food;
+        player.rad = saveData.player.rad;
+        player.energy = saveData.player.energy;
+        player.mode = saveData.player.mode;
+        player.difficulty = saveData.player.difficulty;
+        
+        // 恢复玩家位置
+        if (saveData.player.position) {
+          player.position.set(
+            saveData.player.position.x,
+            saveData.player.position.y,
+            saveData.player.position.z
+          );
+        }
+      }
+    }, 100);
+    
+    return true;
+  } catch (e) {
+    console.error('加载游戏失败:', e);
+    return false;
   }
 }
 

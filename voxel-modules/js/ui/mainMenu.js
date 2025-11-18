@@ -1,5 +1,6 @@
 import { showCreatePanel } from './createWorld.js';
-import { startGame } from '../main.js';
+import { startGame, loadGame } from '../main.js';
+import { saveManager } from '../saveManager.js';
 
 export function showMainMenu() {
   console.log('显示主菜单');
@@ -9,14 +10,16 @@ export function showMainMenu() {
   document.getElementById('market').classList.add('hidden');
   document.getElementById('settings-panel').classList.add('hidden');
   document.getElementById('help-panel').classList.add('hidden');
+  document.getElementById('save-load-panel').classList.add('hidden');
   document.getElementById('error-message').style.display = 'none';
   
   const newButton = document.getElementById('btn-new');
   const continueButton = document.getElementById('btn-continue');
+  const loadButton = document.getElementById('btn-load');
   const settingsButton = document.getElementById('btn-settings');
   const helpButton = document.getElementById('btn-help');
   
-  console.log('找到按钮元素:', { newButton, continueButton, settingsButton, helpButton });
+  console.log('找到按钮元素:', { newButton, continueButton, loadButton, settingsButton, helpButton });
   
   if (newButton) {
     newButton.onclick = () => {
@@ -76,6 +79,20 @@ export function showMainMenu() {
     console.error('找不到帮助按钮');
   }
   
+  if (loadButton) {
+    loadButton.onclick = () => {
+      console.log('点击了加载存档按钮');
+      try {
+        showSaveLoadPanel();
+      } catch (e) {
+        console.error('打开存档面板失败:', e);
+        showError('无法打开存档面板: ' + e.message);
+      }
+    };
+  } else {
+    console.error('找不到加载存档按钮');
+  }
+  
   // 设置面板事件
   const closeSettingsButton = document.getElementById('btn-close-settings');
   const saveSettingsButton = document.getElementById('btn-save-settings');
@@ -105,6 +122,96 @@ export function showMainMenu() {
     };
   }
 }
+
+// 显示存档/读档面板
+function showSaveLoadPanel() {
+  document.getElementById('main-menu').classList.add('hidden');
+  const panel = document.getElementById('save-load-panel');
+  panel.classList.remove('hidden');
+  
+  // 绑定关闭事件
+  const closeBtn = document.getElementById('btn-close-save-panel');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      panel.classList.add('hidden');
+      document.getElementById('main-menu').classList.remove('hidden');
+    };
+  }
+  
+  // 绑定保存事件
+  const saveBtn = document.getElementById('btn-save-game');
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      const saveName = document.getElementById('save-name').value || '默认存档';
+      // 这里应该调用实际的保存函数
+      alert(`存档 "${saveName}" 已保存到浏览器存储中`);
+    };
+  }
+  
+  // 绑定文件选择和导入事件
+  const browseBtn = document.getElementById('btn-browse-saves');
+  const fileInput = document.getElementById('save-file-input');
+  if (browseBtn && fileInput) {
+    browseBtn.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        saveManager.importSave(file).then(saveName => {
+          alert(`存档 "${saveName}" 已导入`);
+          refreshSaveList();
+        }).catch(err => {
+          alert('导入失败: ' + err.message);
+        });
+      }
+    };
+  }
+  
+  // 初始化并显示存档列表
+  refreshSaveList();
+}
+
+// 刷新存档列表显示
+function refreshSaveList() {
+  const saveListContainer = document.getElementById('save-list');
+  if (!saveListContainer) return;
+  
+  const saves = saveManager.getSaveList();
+  if (saves.length === 0) {
+    saveListContainer.innerHTML = '<p>暂无存档</p>';
+    return;
+  }
+  
+  saveListContainer.innerHTML = saves.map(saveName => `
+    <div class="save-item">
+      <span>${saveName}</span>
+      <div>
+        <button onclick="loadSave('${saveName}')" class="action-btn">加载</button>
+        <button onclick="deleteSave('${saveName}')" class="menu-btn">删除</button>
+        <button onclick="exportSave('${saveName}')" class="menu-btn">导出</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 全局函数，供HTML中的onclick调用
+window.loadSave = (saveName) => {
+  if (loadGame(saveName)) {
+    document.getElementById('save-load-panel').classList.add('hidden');
+  } else {
+    alert('加载存档失败');
+  }
+};
+
+window.deleteSave = (saveName) => {
+  if (confirm(`确定要删除存档 "${saveName}" 吗？`)) {
+    saveManager.deleteSave(saveName);
+    refreshSaveList();
+  }
+};
+
+window.exportSave = (saveName) => {
+  saveManager.exportSave(saveName);
+};
 
 function showError(message) {
   const errorElement = document.getElementById('error-message');

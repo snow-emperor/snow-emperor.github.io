@@ -14,6 +14,7 @@
     <div class="menu-buttons">
       <button id="btn-new" class="menu-btn">新建世界</button>
       <button id="btn-continue" class="menu-btn">继续游戏</button>
+      <button id="btn-load" class="menu-btn">加载存档</button>
       <button id="btn-settings" class="menu-btn">游戏设置</button>
       <button id="btn-help" class="menu-btn">帮助说明</button>
     </div>
@@ -92,6 +93,23 @@
     </div>
     <button id="btn-close-help" class="action-btn">关闭</button>
   </div>
+  <div id="save-load-panel" class="panel hidden">
+    <h2>存档管理</h2>
+    <div class="save-section">
+      <h3>保存游戏</h3>
+      <div class="form-group">
+        <label>存档名称 <input id="save-name" value="我的存档" placeholder="输入存档名称"/></label>
+      </div>
+      <button id="btn-save-game" class="action-btn">保存游戏</button>
+    </div>
+    <div class="load-section">
+      <h3>加载存档</h3>
+      <input type="file" id="save-file-input" accept=".json" style="display: none;">
+      <button id="btn-browse-saves" class="menu-btn">浏览存档文件</button>
+      <div id="save-list"></div>
+    </div>
+    <button id="btn-close-save-panel" class="action-btn">返回</button>
+  </div>
   <div id="hud" class="hidden">
     <div id="hud-left">
       <div id="hp">❤ 20</div>
@@ -105,6 +123,9 @@
       <div id="fps">FPS: 60</div>
     </div>
     <div id="hotbar"></div>
+    <div id="save-indicator" style="position: absolute; top: 10px; width: 100%; text-align: center; display: none; color: #4CAF50;">
+      存档已保存!
+    </div>
   </div>
   <div id="market" class="panel hidden"></div>
 </div>
