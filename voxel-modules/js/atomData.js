@@ -1,0 +1,66 @@
+export const ELEMENTS = [
+  {symbol:'H',  name:'Hydrogen',   color:0xffffff, density:0.07,  state:'gas',  radio:false, decay:null,  price:0  },
+  {symbol:'He', name:'Helium',     color:0x87ceeb, density:0.16,  state:'gas',  radio:false, decay:null,  price:10 },
+  {symbol:'Li', name:'Lithium',    color:0xb8860b, density:0.53,  state:'solid',radio:false, decay:null,  price:20 },
+  {symbol:'Be', name:'Beryllium',  color:0xc0c0c0, density:1.85,  state:'solid',radio:false, decay:null,  price:100},
+  {symbol:'B',  name:'Boron',      color:0xffd700, density:2.34,  state:'solid',radio:false, decay:null,  price:50 },
+  {symbol:'C',  name:'Carbon',     color:0x2f4f4f, density:2.27,  state:'solid',radio:false, decay:null,  price:10 },
+  {symbol:'N',  name:'Nitrogen',   color:0x87cefa, density:0.81,  state:'gas',  radio:false, decay:null,  price:10 },
+  {symbol:'O',  name:'Oxygen',     color:0xff0000, density:1.14,  state:'gas',  radio:false, decay:null,  price:10 },
+  {symbol:'F',  name:'Fluorine',   color:0x00ffff, density:1.33,  state:'gas',  radio:false, decay:null,  price:200},
+  {symbol:'Ne', name:'Neon',       color:0xffb6c1, density:0.90,  state:'gas',  radio:false, decay:null,  price:50 },
+  {symbol:'Na', name:'Sodium',     color:0x1e90ff, density:0.97,  state:'solid',radio:false, decay:null,  price:30 },
+  {symbol:'Mg', name:'Magnesium',  color:0xdeb887, density:1.74,  state:'solid',radio:false, decay:null,  price:40 },
+  {symbol:'Al', name:'Aluminum',   color:0xc0c0c0, density:2.70,  state:'solid',radio:false, decay:null,  price:30 },
+  {symbol:'Si', name:'Silicon',    color:0xdaa520, density:2.33,  state:'solid',radio:false, decay:null,  price:25 },
+  {symbol:'P',  name:'Phosphorus', color:0xffa500, density:1.82,  state:'solid',radio:false, decay:null,  price:80 },
+  {symbol:'S',  name:'Sulfur',     color:0xffff00, density:2.07,  state:'solid',radio:false, decay:null,  price:30 },
+  {symbol:'Cl', name:'Chlorine',   color:0x00ff00, density:2.99,  state:'gas',  radio:false, decay:null,  price:40 },
+  {symbol:'Ar', name:'Argon',      color:0xff69b4, density:1.78,  state:'gas',  radio:false, decay:null,  price:60 },
+  {symbol:'K',  name:'Potassium',  color:0x4169e1, density:0.86,  state:'solid',radio:false, decay:null,  price:50 },
+  {symbol:'Ca', name:'Calcium',    color:0x708090, density:1.55,  state:'solid',radio:false, decay:null,  price:40 },
+  {symbol:'Sc', name:'Scandium',   color:0x87ceeb, density:2.99,  state:'solid',radio:false, decay:null,  price:300},
+  {symbol:'Ti', name:'Titanium',   color:0x7fffd4, density:4.51,  state:'solid',radio:false, decay:null,  price:100},
+  {symbol:'V',  name:'Vanadium',   color:0x6495ed, density:6.11,  state:'solid',radio:false, decay:null,  price:200},
+  {symbol:'Cr', name:'Chromium',   color:0xf5deb3, density:7.19,  state:'solid',radio:false, decay:null,  price:120},
+  {symbol:'Mn', name:'Manganese',  color:0xffa07a, density:7.21,  state:'solid',radio:false, decay:null,  price:150},
+  {symbol:'Fe', name:'Iron',       color:0xd3d3d3, density:7.87,  state:'solid',radio:false, decay:null,  price:20 },
+  {symbol:'Co', name:'Cobalt',     color:0x4682b4, density:8.90,  state:'solid',radio:false, decay:null,  price:200},
+  {symbol:'Ni', name:'Nickel',     color:0xd2691e, density:8.91,  state:'solid',radio:false, decay:null,  price:50 },
+  {symbol:'Cu', name:'Copper',     color:0xcd853f, density:8.96,  state:'solid',radio:false, decay:null,  price:40 },
+  {symbol:'Zn', name:'Zinc',       color:0xf0e68c, density:7.14,  state:'solid',radio:false, decay:null,  price:30 },
+  {symbol:'Ga', name:'Gallium',    color:0xdc143c, density:5.91,  state:'solid',radio:false, decay:null,  price:400},
+  {symbol:'Ge', name:'Germanium',  color:0x20b2aa, density:5.32,  state:'solid',radio:false, decay:null,  price:300},
+  {symbol:'As', name:'Arsenic',    color:0x9370db, density:5.72,  state:'solid',radio:false, decay:null,  price:150},
+  {symbol:'Se', name:'Selenium',   color:0x3cb371, density:4.82,  state:'solid',radio:false, decay:null,  price:250},
+  {symbol:'Br', name:'Bromine',    color:0x8b0000, density:3.12,  state:'liquid',radio:false, decay:null, price:300},
+  {symbol:'Kr', name:'Krypton',    color:0xff6347, density:3.75,  state:'gas',  radio:false, decay:null,  price:400},
+  {symbol:'Rb', name:'Rubidium',   color:0x483d8b, density:1.53,  state:'solid',radio:false, decay:null,  price:500},
+  {symbol:'Sr', name:'Strontium',  color:0x2e8b57, density:2.63,  state:'solid',radio:false, decay:null,  price:300},
+  {symbol:'Y',  name:'Yttrium',    color:0x556b2f, density:4.47,  state:'solid',radio:false, decay:null,  price:400},
+  {symbol:'Zr', name:'Zirconium',  color:0x00fa9a, density:6.51,  state:'solid',radio:false, decay:null,  price:250},
+  {symbol:'Nb', name:'Niobium',    color:0x008b8b, density:8.57,  state:'solid',radio:false, decay:null,  price:350},
+  {symbol:'Mo', name:'Molybdenum', color:0x696969, density:10.28, state:'solid',radio:false, decay:null,  price:300},
+  {symbol:'Tc', name:'Technetium', color:0x2f4f4f, density:11.5,  state:'solid',radio:true,  decay:null,  price:1000},
+  {symbol:'Ru', name:'Ruthenium',  color:0x4b0082, density:12.37, state:'solid',radio:false, decay:null,  price:500},
+  {symbol:'Rh', name:'Rhodium',    color:0x48d1cc, density:12.45, state:'solid',radio:false, decay:null,  price:800},
+  {symbol:'Pd', name:'Palladium',  color:0xafeeee, density:12.02, state:'solid',radio:false, decay:null,  price:700},
+  {symbol:'Ag', name:'Silver',     color:0xc0c0c0, density:10.49, state:'solid',radio:false, decay:null,  price:100},
+  {symbol:'Cd', name:'Cadmium',    color:0x9400d3, density:8.65,  state:'solid',radio:false, decay:null,  price:200},
+  {symbol:'In', name:'Indium',     color:0x000080, density:7.31,  state:'solid',radio:false, decay:null,  price:300},
+  {symbol:'Sn', name:'Tin',        color:0x66cdaa, density:7.31,  state:'solid',radio:false, decay:null,  price:80 },
+  // 物体类型占位符
+  {symbol:'stone', name:'Stone', color:0x888888, density:2.5, state:'solid', radio:false, decay:null, price:0},
+  {symbol:'dirt', name:'Dirt', color:0x795548, density:1.2, state:'solid', radio:false, decay:null, price:0},
+  {symbol:'iron_ore', name:'Iron Ore', color:0xcd853f, density:3.0, state:'solid', radio:false, decay:null, price:0},
+  {symbol:'coal', name:'Coal', color:0x2f4f4f, density:1.3, state:'solid', radio:false, decay:null, price:0},
+  {symbol:'gold_ore', name:'Gold Ore', color:0xffd700, density:2.8, state:'solid', radio:false, decay:null, price:0}
+];
+
+// 创建符号到ID的映射
+export const SYM2ID = {};
+for (let i = 0; i < ELEMENTS.length; i++) {
+  SYM2ID[ELEMENTS[i].symbol] = i;
+}
+
+export const ID2SYM = ELEMENTS.map(e=>e.symbol);
