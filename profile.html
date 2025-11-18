@@ -3,290 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>卡巴斯基网络威胁地图</title>
+    <title>HTML简介</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-        }
-        
         body {
-            background: linear-gradient(135deg, #0c1a2c 0%, #152642 100%);
-            color: #e0e0e0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 800px;
-            width: 100%;
-            text-align: center;
-            padding: 40px;
-            background: rgba(16, 31, 53, 0.8);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(64, 156, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(64, 156, 255, 0.1) 0%, transparent 70%);
-            z-index: -1;
-        }
-        
-        .logo {
-            margin-bottom: 30px;
-        }
-        
-        .logo h1 {
-            font-size: 2.8rem;
-            background: linear-gradient(90deg, #4a9cff, #6bc2ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 10px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-        
-        .logo p {
-            color: #8fa3c7;
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-        }
-        
-        .threat-visualization {
-            width: 100%;
-            height: 200px;
-            background: rgba(10, 20, 35, 0.7);
-            border-radius: 12px;
-            margin: 30px 0;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(64, 156, 255, 0.3);
-        }
-        
-        .globe {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #1a3a5f, #0c1a2c);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 30px rgba(64, 156, 255, 0.3);
-        }
-        
-        .threat-dot {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ff4757;
-            animation: pulse 2s infinite;
-        }
-        
-        .threat-dot:nth-child(2) {
-            top: 30%;
-            left: 25%;
-            background: #ffa502;
-            animation-delay: 0.5s;
-        }
-        
-        .threat-dot:nth-child(3) {
-            top: 60%;
-            left: 70%;
-            background: #2ed573;
-            animation-delay: 1s;
-        }
-        
-        .threat-dot:nth-child(4) {
-            top: 40%;
-            left: 60%;
-            background: #ff4757;
-            animation-delay: 1.5s;
-        }
-        
-        .threat-dot:nth-child(5) {
-            top: 70%;
-            left: 40%;
-            background: #ffa502;
-            animation-delay: 0.8s;
-        }
-        
-        .threat-dot:nth-child(6) {
-            top: 20%;
-            left: 50%;
-            background: #2ed573;
-            animation-delay: 0.3s;
-        }
-        
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            70% {
-                transform: scale(2.5);
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 0;
-            }
-        }
-        
-        .connection-line {
-            position: absolute;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(64, 156, 255, 0.7), transparent);
-            transform-origin: left center;
-        }
-        
-        .description {
-            margin: 25px 0;
-            font-size: 1.1rem;
-            color: #b8c7e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.7;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f8ff;
+            color: #2c3e50;
         }
-        
-        .redirect-btn {
-            display: inline-block;
-            background: linear-gradient(90deg, #2a6bc9, #3a8cff);
-            color: white;
-            padding: 14px 36px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            border-radius: 50px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(42, 107, 201, 0.4);
-            margin: 20px 0;
-            border: none;
-            cursor: pointer;
-        }
-        
-        .redirect-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(42, 107, 201, 0.6);
-            background: linear-gradient(90deg, #3a7bd5, #4a9cff);
-        }
-        
-        .redirect-btn:active {
-            transform: translateY(1px);
-        }
-        
-        .security-tips {
-            background: rgba(20, 38, 64, 0.6);
-            border-radius: 12px;
-            padding: 25px;
+        h1, h2, h3 {
+            color: #2980b9;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
             margin-top: 30px;
-            text-align: left;
-            border-left: 4px solid #3a8cff;
         }
-        
-        .security-tips h3 {
-            color: #6bc2ff;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            border-bottom: 3px solid #3498db;
         }
-        
-        .security-tips ul {
-            list-style-type: none;
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 40px;
         }
-        
-        .security-tips li {
-            margin-bottom: 12px;
+        h3 {
+            font-size: 1.4rem;
+            color: #3498db;
+            border-bottom: 1px solid #bdc3c7;
+        }
+        p {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 25px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+        }
+        .code-block code {
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        ul {
             padding-left: 25px;
+            margin-bottom: 25px;
+        }
+        li {
+            margin-bottom: 12px;
             position: relative;
         }
-        
-        .security-tips li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #2ed573;
+        li::before {
+            content: "•";
+            color: #3498db;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        .intro-section {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 35px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+            border-top: 5px solid #3498db;
+        }
+        .intro-section p {
+            font-size: 1.1rem;
+        }
+        .highlight {
+            background-color: #eaf5ff;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #2980b9;
             font-weight: bold;
         }
-        
-        .footer {
-            margin-top: 30px;
-            color: #8fa3c7;
-            font-size: 0.9rem;
+        strong {
+            color: #2980b9;
         }
         
-        @media (max-width: 600px) {
-            .container {
-                padding: 25px 20px;
-            }
-            
-            .logo h1 {
-                font-size: 2.2rem;
-            }
-            
-            .threat-visualization {
-                height: 150px;
-            }
-            
-            .description {
-                font-size: 1rem;
-            }
+        /* 游戏按钮样式 - 玻璃拟态风格 */
+        .game-button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .game-button {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 
+                        inset 0 0 10px rgba(255, 255, 255, 0.5);
+            color: #2c3e50;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px 40px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15), 
+                        inset 0 0 15px rgba(255, 255, 255, 0.6);
+        }
+        .game-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1), 
+                        inset 0 0 5px rgba(255, 255, 255, 0.4);
+        }
+        .game-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+        .game-button:hover::before {
+            left: 100%;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <h1>卡巴斯基网络威胁地图</h1>
-            <p>全球网络安全威胁实时监控</p>
-        </div>
+    <h1>HTML 简介</h1>
+    
+    <div class="intro-section">
+        <p>HTML（HyperText Markup Language，超文本标记语言）是用于创建网页的标准标记语言。它描述了网页的结构和内容，使用各种标签（tag）来定义文本、图片、链接等元素。</p>
         
-        <div class="threat-visualization">
-            <div class="globe"></div>
-            <div class="threat-dot"></div>
-            <div class="threat-dot"></div>
-            <div class="threat-dot"></div>
-            <div class="threat-dot"></div>
-            <div class="threat-dot"></div>
-            <div class="threat-dot"></div>
-        </div>
-        
-        <div class="description">
-            <p>卡巴斯基网络威胁地图实时展示全球范围内的网络安全威胁活动，包括恶意软件攻击、网络钓鱼、僵尸网络活动等。</p>
-            <p>通过可视化界面，您可以直观了解当前网络威胁的分布情况和攻击趋势。</p>
-        </div>
-        
-        <a href="https://cybermap.kaspersky.com/cn" class="redirect-btn">查看实时威胁地图</a>
-        
-        <div class="security-tips">
-            <h3>网络安全小贴士</h3>
-            <ul>
-                <li>定期更新操作系统和软件补丁</li>
-                <li>使用强密码并启用双重验证</li>
-                <li>谨慎点击不明链接和附件</li>
-                <li>安装并保持安全软件更新</li>
-                <li>定期备份重要数据</li>
-            </ul>
-        </div>
-        
-        <div class="footer">
-            <p>© 2023 卡巴斯基实验室 | 提供专业网络安全解决方案</p>
+        <!-- 添加游戏按钮 -->
+        <div class="game-button-container">
+            <button class="game-button" onclick="window.location.href='voxel-modules/index.html'">🎮 玩会游戏</button>
         </div>
     </div>
+
+    <h2>HTML 基础结构</h2>
+    <p>一个基本的 HTML 文档包含以下结构：</p>
+    <div class="code-block">
+        <code>
+&lt;!DOCTYPE html&gt;<br>
+&lt;html lang="zh-CN"&gt;<br>
+&lt;head&gt;<br>
+    &lt;meta charset="UTF-8"&gt;<br>
+    &lt;title&gt;页面标题&lt;/title&gt;<br>
+&lt;/head&gt;<br>
+&lt;body&gt;<br>
+    &lt;h1&gt;这是主标题&lt;/h1&gt;<br>
+    &lt;p&gt;这是一个段落。&lt;/p&gt;<br>
+&lt;/body&gt;<br>
+&lt;/html&gt;
+        </code>
+    </div>
+
+    <h2>HTML 常用标签</h2>
+    <ul>
+        <li><span class="highlight">&lt;h1&gt; - &lt;h6&gt;</span>：定义标题，<span class="highlight">&lt;h1&gt;</span> 是最高级别的标题</li>
+        <li><span class="highlight">&lt;p&gt;</span>：定义段落</li>
+        <li><span class="highlight">&lt;a&gt;</span>：定义超链接</li>
+        <li><span class="highlight">&lt;img&gt;</span>：定义图像</li>
+        <li><span class="highlight">&lt;ul&gt;</span> 和 <span class="highlight">&lt;ol&gt;</span>：定义无序列表和有序列表</li>
+        <li><span class="highlight">&lt;li&gt;</span>：定义列表项</li>
+        <li><span class="highlight">&lt;div&gt;</span>：定义文档中的块级元素，常用于布局</li>
+        <li><span class="highlight">&lt;span&gt;</span>：定义文档中的行内元素</li>
+    </ul>
+
+    <h2>HTML5 新特性</h2>
+    <p>HTML5 是最新的 HTML 标准，引入了许多新特性：</p>
+    <ul>
+        <li>新的语义元素：<span class="highlight">&lt;header&gt;</span>、<span class="highlight">&lt;footer&gt;</span>、<span class="highlight">&lt;article&gt;</span>、<span class="highlight">&lt;section&gt;</span> 等</li>
+        <li>新的表单控件：数字、日期、时间、日历、滑块等</li>
+        <li>强大的图像支持：<span class="highlight">&lt;canvas&gt;</span> 和 <span class="highlight">&lt;svg&gt;</span></li>
+        <li>强大的多媒体支持：<span class="highlight">&lt;video&gt;</span> 和 <span class="highlight">&lt;audio&gt;</span></li>
+        <li>新的 API：如本地存储、地理定位、拖放等</li>
+    </ul>
+
+    <h2>HTML 示例</h2>
+    <p>以下是一个包含多种 HTML 元素的示例：</p>
+    <div class="code-block">
+        <code>
+&lt;!DOCTYPE html&gt;<br>
+&lt;html lang="zh-CN"&gt;<br>
+&lt;head&gt;<br>
+    &lt;meta charset="UTF-8"&gt;<br>
+    &lt;title&gt;HTML 示例页面&lt;/title&gt;<br>
+&lt;/head&gt;<br>
+&lt;body&gt;<br>
+    &lt;header&gt;<br>
+        &lt;h1&gt;欢迎来到我的网站&lt;/h1&gt;<br>
+        &lt;nav&gt;<br>
+            &lt;ul&gt;<br>
+                &lt;li&gt;&lt;a href="#home"&gt;首页&lt;/a&gt;&lt;/li&gt;<br>
+                &lt;li&gt;&lt;a href="#about"&gt;关于&lt;/a&gt;&lt;/li&gt;<br>
+                &lt;li&gt;&lt;a href="#contact"&gt;联系&lt;/a&gt;&lt;/li&gt;<br>
+            &lt;/ul&gt;<br>
+        &lt;/nav&gt;<br>
+    &lt;/header&gt;<br><br>
+    &lt;main&gt;<br>
+        &lt;section id="home"&gt;<br>
+            &lt;h2&gt;首页&lt;/h2&gt;<br>
+            &lt;p&gt;这是一个使用 HTML5 创建的示例页面。&lt;/p&gt;<br>
+            &lt;img src="example.jpg" alt="示例图片"&gt;<br>
+        &lt;/section&gt;<br><br>
+        &lt;section id="about"&gt;<br>
+            &lt;h2&gt;关于我们&lt;/h2&gt;<br>
+            &lt;p&gt;我们是一个致力于 Web 开发的团队。&lt;/p&gt;<br>
+        &lt;/section&gt;<br><br>
+        &lt;section id="contact"&gt;<br>
+            &lt;h2&gt;联系我们&lt;/h2&gt;<br>
+            &lt;form&gt;<br>
+                &lt;label for="name"&gt;姓名：&lt;/label&gt;<br>
+                &lt;input type="text" id="name" name="name"&gt;&lt;br&gt;&lt;br&gt;<br>
+                &lt;label for="email"&gt;邮箱：&lt;/label&gt;<br>
+                &lt;input type="email" id="email" name="email"&gt;&lt;br&gt;&lt;br&gt;<br>
+                &lt;input type="submit" value="提交"&gt;<br>
+            &lt;/form&gt;<br>
+        &lt;/section&gt;<br>
+    &lt;/main&gt;<br><br>
+    &lt;footer&gt;<br>
+        &lt;p&gt;&copy; 2024 我的网站。保留所有权利。&lt;/p&gt;<br>
+    &lt;/footer&gt;<br>
+&lt;/body&gt;<br>
+&lt;/html&gt;
+        </code>
+    </div>
+
+    <h2>学习 HTML 的建议</h2>
+    <ul>
+        <li>从基础标签开始学习，逐步掌握每个标签的用途</li>
+        <li>多练习手写 HTML 代码，加深记忆</li>
+        <li>使用浏览器开发者工具查看网页的 HTML 结构</li>
+        <li>学习 HTML 的同时，了解 CSS 和 JavaScript，它们共同构成前端开发的基础</li>
+        <li>参考权威教程，如 <a href="https://www.w3school.com.cn/html/index.asp" target="_blank">W3School HTML 教程</a>（本链接为外部链接，可在新窗口打开）</li>
+    </ul>
+
+    <h2>HTML 与 CSS、JavaScript 的关系</h2>
+    <p>HTML、CSS 和 JavaScript 是前端开发的三大核心技术：</p>
+    <ul>
+        <li><strong>HTML</strong>：负责网页的结构和内容</li>
+        <li><strong>CSS</strong>：负责网页的样式和布局</li>
+        <li><strong>JavaScript</strong>：负责网页的交互和动态效果</li>
+    </ul>
+    <p>三者相辅相成，共同创造出功能丰富、美观的网页应用。</p>
+
+    <h2>HTML 验证与调试</h2>
+    <p>为了确保 HTML 代码的正确性，可以使用以下工具进行验证和调试：</p>
+    <ul>
+        <li><a href="https://validator.w3.org/" target="_blank">W3C Markup Validator</a>：验证 HTML 代码是否符合标准</li>
+        <li>浏览器开发者工具：查看和调试 HTML、CSS 和 JavaScript</li>
+    </ul>
+
+    <h2>总结</h2>
+    <p>HTML 是构建网页的基础语言，通过学习和掌握 HTML，您可以创建出结构清晰、内容丰富的网页。随着学习的深入，您还可以探索 HTML5 的新特性，以及结合 CSS 和 JavaScript，创建出更加动态和交互性强的网页应用。</p>
+    <p>希望这份简介能帮助您快速了解 HTML 的基础知识，开启您的 Web 开发之旅！</p>
+
+    <!-- 在页面底部也添加一个游戏按钮 -->
+    <div class="game-button-container">
+        <button class="game-button" onclick="window.location.href='voxel-modules/index.html'">🎮 玩会游戏</button>
+    </div>
+
 </body>
 </html>
