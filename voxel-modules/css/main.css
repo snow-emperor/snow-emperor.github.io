@@ -1,0 +1,26 @@
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
+body{background:#000;color:#fff;overflow:hidden}
+.panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(34,34,34,0.95);padding:30px;border-radius:15px;text-align:center;box-shadow:0 0 30px rgba(0,120,255,0.5);border:1px solid #444}
+.panel h1,.panel h2{margin-bottom:20px;color:#4fc3f7}
+.panel button{width:200px;margin:8px 0;padding:12px;font-size:16px;cursor:pointer;border-radius:8px;border:none;transition:all 0.2s}
+.menu-btn{background:linear-gradient(to bottom, #2196F3, #0d47a1);color:#fff}
+.menu-btn:hover{background:linear-gradient(to bottom, #42A5F5, #1565C0);transform:scale(1.05)}
+.action-btn{background:linear-gradient(to bottom, #4CAF50, #2E7D32);color:#fff}
+.action-btn:hover{background:linear-gradient(to bottom, #66BB6A, #388E3C);transform:scale(1.05)}
+.form-group{margin:15px 0}
+.form-group label{display:block;margin-bottom:5px;text-align:left;color:#ddd}
+.form-group input,.form-group select{width:100%;padding:10px;margin:5px 0;border-radius:5px;border:1px solid #555;background:#222;color:#fff}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:#2196F3;box-shadow:0 0 5px rgba(33,150,243,0.5)}
+.form-buttons{margin:20px 0}
+.hidden{display:none}
+#hud{position:absolute;top:0;left:0;width:100%;pointer-events:none}
+#hud-left{position:absolute;top:10px;left:10px;font-size:18px}
+#hud-right{position:absolute;top:10px;right:10px;text-align:right}
+#hotbar{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex}
+.atom-slot{width:40px;height:40px;background:#333;border:2px solid #666;margin:2px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.settings-group{margin:20px 0;text-align:left}
+.settings-group label{display:block;margin:10px 0;color:#ddd}
+.help-content{text-align:left;max-height:60vh;overflow-y:auto;margin-bottom:20px}
+.help-content h3{margin:15px 0 5px;color:#4fc3f7}
+.help-content ul{margin-left:20px}
+.help-content li{margin:5px 0}
