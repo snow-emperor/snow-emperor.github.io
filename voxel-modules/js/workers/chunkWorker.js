@@ -1,6 +1,6 @@
 import { atomAt } from '../worldgen.js';
 
-const CS = 1024;
+const CS = 64; // 恢复合理的区块大小
 self.onmessage = ({ data: { sab, cx, cy, cz } }) => {
   try {
     const arr = new Uint16Array(sab);

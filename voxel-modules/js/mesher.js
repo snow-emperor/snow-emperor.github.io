@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
 import { ELEMENTS } from './atomData.js';
 
-const CS = 1024, atlasRows = 8;
+const CS = 64, atlasRows = 8; // 恢复合理的区块大小
 const geo = new THREE.PlaneGeometry(0.1, 0.1); // 0.1 nm
 let atlasTex = null;
 

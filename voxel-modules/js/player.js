@@ -99,7 +99,7 @@ export class Player {
     const now = Date.now();
     if (now - this.lastBreakTime < mineTime(this.mode, this.selectedID, this.difficulty)) return;
     
-    const hit = this.raycast(5);
+    const hit = this.raycast(6);
     if (!hit) return;
     
     if (this.mode === GameMode.ADVENTURE && !canBreak(this.mode, this.chunkMgr.getAtom(hit.x, hit.y, hit.z))) {
@@ -120,7 +120,7 @@ export class Player {
     const now = Date.now();
     if (now - this.lastPlaceTime < 100) return; // 放置间隔限制
     
-    const hit = this.raycast(5);
+    const hit = this.raycast(6);
     if (!hit) return;
     
     if (this.mode === GameMode.ADVENTURE && !canPlace(this.mode, this.selectedID)) {

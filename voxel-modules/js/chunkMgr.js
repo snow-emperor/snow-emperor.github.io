@@ -3,7 +3,7 @@ import { buildChunkInstanced } from './mesher.js';
 import { scene } from './main.js';
 import { atomAt } from './worldgen.js';
 
-const CS = 1024, RENDER_DIST = 4;
+const CS = 64, RENDER_DIST = 3; // 恢复合理的区块大小，减少渲染距离
 const CHUNK_SIZE = 10; // 可视化区块大小（米）
 
 function key(cx, cy, cz) { return `${cx}_${cy}_${cz}`; }
@@ -14,6 +14,8 @@ export class ChunkMgr {
     this.dirtyQueue = [];
     this.useWorkers = false; // 默认不使用Workers，避免CORS问题
     this.camera = null;
+    this.chunkLoadQueue = []; // 区块加载队列
+    this.maxChunksPerFrame = 2; // 每帧最多加载的区块数
     
     // 尝试初始化Web Workers
     try {
@@ -32,6 +34,7 @@ export class ChunkMgr {
     this.camera = camera;
     const pcx = Math.floor(playerPos.x / CS), pcy = Math.floor(playerPos.y / CS), pcz = Math.floor(playerPos.z / CS);
     const needed = new Set();
+    const neededChunks = [];
     
     // 优先加载玩家附近的区块
     for (let dx = -RENDER_DIST; dx <= RENDER_DIST; dx++) {
@@ -39,11 +42,16 @@ export class ChunkMgr {
         for (let dz = -RENDER_DIST; dz <= RENDER_DIST; dz++) {
           const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
           if (dist <= RENDER_DIST) {
-            needed.add(key(pcx + dx, pcy + dy, pcz + dz));
+            const chunkKey = key(pcx + dx, pcy + dy, pcz + dz);
+            needed.add(chunkKey);
+            neededChunks.push({key: chunkKey, dist: dist, x: pcx + dx, y: pcy + dy, z: pcz + dz});
           }
         }
       }
     }
+    
+    // 按距离排序，近的优先
+    neededChunks.sort((a, b) => a.dist - b.dist);
     
     // 移除不需要的区块
     for (const [k, ch] of this.chunks) {
@@ -53,22 +61,32 @@ export class ChunkMgr {
       }
     }
     
-    // 添加新需要的区块
-    for (const k of needed) {
-      if (!this.chunks.has(k)) {
-        const [cx, cy, cz] = k.split('_').map(Number);
-        if (this.useWorkers) {
-          try {
-            const sab = new SharedArrayBuffer(CS * CS * CS * 2);
-            this.worker.postMessage({ sab, cx, cy, cz }, [sab]);
-          } catch (e) {
-            console.warn('通过Web Worker生成区块失败，使用主线程:', e);
-            this.generateChunkOnMainThread(cx, cy, cz);
-          }
-        } else {
-          this.generateChunkOnMainThread(cx, cy, cz);
-        }
+    // 添加新需要的区块到加载队列
+    for (const chunkInfo of neededChunks) {
+      const {key, x, y, z} = chunkInfo;
+      if (!this.chunks.has(key) && !this.chunkLoadQueue.find(item => item.key === key)) {
+        this.chunkLoadQueue.push({key, x, y, z});
       }
+    }
+    
+    // 每帧只加载有限数量的区块
+    let loadedCount = 0;
+    while (this.chunkLoadQueue.length > 0 && loadedCount < this.maxChunksPerFrame) {
+      const chunkInfo = this.chunkLoadQueue.shift();
+      const {x, y, z} = chunkInfo;
+      
+      if (this.useWorkers) {
+        try {
+          const sab = new SharedArrayBuffer(CS * CS * CS * 2);
+          this.worker.postMessage({ sab, cx: x, cy: y, cz: z }, [sab]);
+        } catch (e) {
+          console.warn('通过Web Worker生成区块失败，使用主线程:', e);
+          this.generateChunkOnMainThread(x, y, z);
+        }
+      } else {
+        this.generateChunkOnMainThread(x, y, z);
+      }
+      loadedCount++;
     }
     
     if (this.dirtyQueue.length) { 
