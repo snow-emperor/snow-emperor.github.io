@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML简介</title>
+    <title>前端开发三剑客：HTML5、CSS与JavaScript完整指南</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.7;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f0f8ff;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f7ff 100%);
             color: #2c3e50;
         }
         h1, h2, h3 {
@@ -32,6 +32,9 @@
         h2 {
             font-size: 1.8rem;
             margin-top: 40px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         h3 {
             font-size: 1.4rem;
@@ -81,9 +84,6 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.08);
             border-top: 5px solid #3498db;
         }
-        .intro-section p {
-            font-size: 1.1rem;
-        }
         .highlight {
             background-color: #eaf5ff;
             padding: 3px 8px;
@@ -95,8 +95,14 @@
         strong {
             color: #2980b9;
         }
-        
-        /* 游戏按钮样式 - 玻璃拟态风格 */
+        .tech-section {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #e74c3c;
+        }
         .game-button-container {
             text-align: center;
             margin: 30px 0;
@@ -144,13 +150,62 @@
         .game-button:hover::before {
             left: 100%;
         }
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab:hover {
+            background-color: #2980b9;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 5px 5px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        .comparison-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
     </style>
 </head>
 <body>
-    <h1>HTML 简介</h1>
+    <h1>前端开发三剑客：HTML5、CSS与JavaScript完整指南</h1>
     
     <div class="intro-section">
-        <p>HTML（HyperText Markup Language，超文本标记语言）是用于创建网页的标准标记语言。它描述了网页的结构和内容，使用各种标签（tag）来定义文本、图片、链接等元素。</p>
+        <p>在现代Web开发中，<strong>HTML5</strong>、<strong>CSS</strong>和<strong>JavaScript</strong>被称为前端开发的"三剑客"。它们分别负责网页的结构、样式和行为，三者协同工作，共同创造出丰富多彩的网页体验。本指南将深入介绍这三种核心技术，帮助您全面理解前端开发的基础。</p>
         
         <!-- 添加游戏按钮 -->
         <div class="game-button-container">
@@ -158,129 +213,734 @@
         </div>
     </div>
 
-    <h2>HTML 基础结构</h2>
-    <p>一个基本的 HTML 文档包含以下结构：</p>
-    <div class="code-block">
-        <code>
-&lt;!DOCTYPE html&gt;<br>
-&lt;html lang="zh-CN"&gt;<br>
-&lt;head&gt;<br>
-    &lt;meta charset="UTF-8"&gt;<br>
-    &lt;title&gt;页面标题&lt;/title&gt;<br>
-&lt;/head&gt;<br>
-&lt;body&gt;<br>
-    &lt;h1&gt;这是主标题&lt;/h1&gt;<br>
-    &lt;p&gt;这是一个段落。&lt;/p&gt;<br>
-&lt;/body&gt;<br>
-&lt;/html&gt;
-        </code>
+    <!-- 标签页导航 -->
+    <div class="tab-container">
+        <button class="tab active" onclick="showTab('html5')">HTML5</button>
+        <button class="tab" onclick="showTab('css')">CSS</button>
+        <button class="tab" onclick="showTab('javascript')">JavaScript</button>
+        <button class="tab" onclick="showTab('integration')">三剑客协作</button>
     </div>
 
-    <h2>HTML 常用标签</h2>
-    <ul>
-        <li><span class="highlight">&lt;h1&gt; - &lt;h6&gt;</span>：定义标题，<span class="highlight">&lt;h1&gt;</span> 是最高级别的标题</li>
-        <li><span class="highlight">&lt;p&gt;</span>：定义段落</li>
-        <li><span class="highlight">&lt;a&gt;</span>：定义超链接</li>
-        <li><span class="highlight">&lt;img&gt;</span>：定义图像</li>
-        <li><span class="highlight">&lt;ul&gt;</span> 和 <span class="highlight">&lt;ol&gt;</span>：定义无序列表和有序列表</li>
-        <li><span class="highlight">&lt;li&gt;</span>：定义列表项</li>
-        <li><span class="highlight">&lt;div&gt;</span>：定义文档中的块级元素，常用于布局</li>
-        <li><span class="highlight">&lt;span&gt;</span>：定义文档中的行内元素</li>
-    </ul>
+    <!-- HTML5内容 -->
+    <div id="html5" class="tab-content active">
+        <h2>HTML5 - 网页的结构骨架</h2>
+        
+        <div class="tech-section">
+            <h3>什么是HTML5？</h3>
+            <p>HTML5（HyperText Markup Language 5）是HTML的第五个主要版本，是构建Web内容的一种语言描述方式。它不仅是HTML4的升级版，更是一个完整的Web应用开发平台。</p>
+        </div>
 
-    <h2>HTML5 新特性</h2>
-    <p>HTML5 是最新的 HTML 标准，引入了许多新特性：</p>
-    <ul>
-        <li>新的语义元素：<span class="highlight">&lt;header&gt;</span>、<span class="highlight">&lt;footer&gt;</span>、<span class="highlight">&lt;article&gt;</span>、<span class="highlight">&lt;section&gt;</span> 等</li>
-        <li>新的表单控件：数字、日期、时间、日历、滑块等</li>
-        <li>强大的图像支持：<span class="highlight">&lt;canvas&gt;</span> 和 <span class="highlight">&lt;svg&gt;</span></li>
-        <li>强大的多媒体支持：<span class="highlight">&lt;video&gt;</span> 和 <span class="highlight">&lt;audio&gt;</span></li>
-        <li>新的 API：如本地存储、地理定位、拖放等</li>
-    </ul>
+        <h3>HTML5 新特性</h3>
+        <ul>
+            <li><strong>语义化标签</strong>：<span class="highlight">&lt;header&gt;</span>、<span class="highlight">&lt;footer&gt;</span>、<span class="highlight">&lt;article&gt;</span>、<span class="highlight">&lt;section&gt;</span>、<span class="highlight">&lt;nav&gt;</span>等</li>
+            <li><strong>多媒体支持</strong>：原生<span class="highlight">&lt;video&gt;</span>和<span class="highlight">&lt;audio&gt;</span>标签，无需插件</li>
+            <li><strong>图形绘制</strong>：<span class="highlight">&lt;canvas&gt;</span>和<span class="highlight">&lt;svg&gt;</span>支持</li>
+            <li><strong>本地存储</strong>：localStorage和sessionStorage</li>
+            <li><strong>表单增强</strong>：新的输入类型和验证属性</li>
+            <li><strong>设备访问</strong>：地理定位、设备方向、摄像头API等</li>
+        </ul>
 
-    <h2>HTML 示例</h2>
-    <p>以下是一个包含多种 HTML 元素的示例：</p>
-    <div class="code-block">
-        <code>
+        <h3>HTML5 基本结构</h3>
+        <div class="code-block">
+            <code>
 &lt;!DOCTYPE html&gt;<br>
 &lt;html lang="zh-CN"&gt;<br>
 &lt;head&gt;<br>
     &lt;meta charset="UTF-8"&gt;<br>
-    &lt;title&gt;HTML 示例页面&lt;/title&gt;<br>
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;<br>
+    &lt;title&gt;HTML5示例页面&lt;/title&gt;<br>
 &lt;/head&gt;<br>
 &lt;body&gt;<br>
     &lt;header&gt;<br>
-        &lt;h1&gt;欢迎来到我的网站&lt;/h1&gt;<br>
+        &lt;h1&gt;网站标题&lt;/h1&gt;<br>
         &lt;nav&gt;<br>
             &lt;ul&gt;<br>
                 &lt;li&gt;&lt;a href="#home"&gt;首页&lt;/a&gt;&lt;/li&gt;<br>
                 &lt;li&gt;&lt;a href="#about"&gt;关于&lt;/a&gt;&lt;/li&gt;<br>
-                &lt;li&gt;&lt;a href="#contact"&gt;联系&lt;/a&gt;&lt;/li&gt;<br>
             &lt;/ul&gt;<br>
         &lt;/nav&gt;<br>
-    &lt;/header&gt;<br><br>
+    &lt;/header&gt;<br>
+    <br>
     &lt;main&gt;<br>
         &lt;section id="home"&gt;<br>
-            &lt;h2&gt;首页&lt;/h2&gt;<br>
-            &lt;p&gt;这是一个使用 HTML5 创建的示例页面。&lt;/p&gt;<br>
-            &lt;img src="example.jpg" alt="示例图片"&gt;<br>
-        &lt;/section&gt;<br><br>
-        &lt;section id="about"&gt;<br>
-            &lt;h2&gt;关于我们&lt;/h2&gt;<br>
-            &lt;p&gt;我们是一个致力于 Web 开发的团队。&lt;/p&gt;<br>
-        &lt;/section&gt;<br><br>
-        &lt;section id="contact"&gt;<br>
-            &lt;h2&gt;联系我们&lt;/h2&gt;<br>
-            &lt;form&gt;<br>
-                &lt;label for="name"&gt;姓名：&lt;/label&gt;<br>
-                &lt;input type="text" id="name" name="name"&gt;&lt;br&gt;&lt;br&gt;<br>
-                &lt;label for="email"&gt;邮箱：&lt;/label&gt;<br>
-                &lt;input type="email" id="email" name="email"&gt;&lt;br&gt;&lt;br&gt;<br>
-                &lt;input type="submit" value="提交"&gt;<br>
-            &lt;/form&gt;<br>
+            &lt;h2&gt;欢迎来到HTML5世界&lt;/h2&gt;<br>
+            &lt;article&gt;<br>
+                &lt;h3&gt;文章标题&lt;/h3&gt;<br>
+                &lt;p&gt;这是文章内容...&lt;/p&gt;<br>
+            &lt;/article&gt;<br>
         &lt;/section&gt;<br>
-    &lt;/main&gt;<br><br>
+    &lt;/main&gt;<br>
+    <br>
     &lt;footer&gt;<br>
-        &lt;p&gt;&copy; 2024 我的网站。保留所有权利。&lt;/p&gt;<br>
+        &lt;p&gt;&copy; 2024 HTML5示例&lt;/p&gt;<br>
     &lt;/footer&gt;<br>
 &lt;/body&gt;<br>
 &lt;/html&gt;
-        </code>
+            </code>
+        </div>
+
+        <h3>HTML5 本地存储示例</h3>
+        <div class="code-block">
+            <code>
+// 使用localStorage存储数据<br>
+localStorage.setItem('username', '张三');<br>
+localStorage.setItem('theme', 'dark');<br>
+<br>
+// 获取存储的数据<br>
+const username = localStorage.getItem('username');<br>
+console.log(username); // 输出: 张三<br>
+<br>
+// 使用sessionStorage存储会话数据<br>
+sessionStorage.setItem('tempData', '临时数据');<br>
+<br>
+// 移除存储的数据<br>
+localStorage.removeItem('theme');<br>
+<br>
+// 清空所有数据<br>
+localStorage.clear();
+            </code>
+        </div>
     </div>
 
-    <h2>学习 HTML 的建议</h2>
-    <ul>
-        <li>从基础标签开始学习，逐步掌握每个标签的用途</li>
-        <li>多练习手写 HTML 代码，加深记忆</li>
-        <li>使用浏览器开发者工具查看网页的 HTML 结构</li>
-        <li>学习 HTML 的同时，了解 CSS 和 JavaScript，它们共同构成前端开发的基础</li>
-        <li>参考权威教程，如 <a href="https://www.w3school.com.cn/html/index.asp" target="_blank">W3School HTML 教程</a>（本链接为外部链接，可在新窗口打开）</li>
-    </ul>
+    <!-- CSS内容 -->
+    <div id="css" class="tab-content">
+        <h2>CSS - 网页的视觉设计师</h2>
+        
+        <div class="tech-section">
+            <h3>什么是CSS？</h3>
+            <p>CSS（Cascading Style Sheets，层叠样式表）是一种用于描述HTML文档外观和格式的样式表语言。它控制网页的布局、颜色、字体、间距等视觉表现，实现了内容与表现的分离。</p>
+        </div>
 
-    <h2>HTML 与 CSS、JavaScript 的关系</h2>
-    <p>HTML、CSS 和 JavaScript 是前端开发的三大核心技术：</p>
-    <ul>
-        <li><strong>HTML</strong>：负责网页的结构和内容</li>
-        <li><strong>CSS</strong>：负责网页的样式和布局</li>
-        <li><strong>JavaScript</strong>：负责网页的交互和动态效果</li>
-    </ul>
-    <p>三者相辅相成，共同创造出功能丰富、美观的网页应用。</p>
+        <h3>CSS 核心特性</h3>
+        <ul>
+            <li><strong>选择器系统</strong>：类选择器、ID选择器、属性选择器、伪类等</li>
+            <li><strong>盒模型</strong>：margin、border、padding、content</li>
+            <li><strong>布局系统</strong>：Flexbox、Grid、浮动、定位</li>
+            <li><strong>响应式设计</strong>：媒体查询适配不同设备</li>
+            <li><strong>动画与过渡</strong>：transition和animation属性</li>
+            <li><strong>层叠与继承</strong>：样式优先级规则</li>
+        </ul>
 
-    <h2>HTML 验证与调试</h2>
-    <p>为了确保 HTML 代码的正确性，可以使用以下工具进行验证和调试：</p>
-    <ul>
-        <li><a href="https://validator.w3.org/" target="_blank">W3C Markup Validator</a>：验证 HTML 代码是否符合标准</li>
-        <li>浏览器开发者工具：查看和调试 HTML、CSS 和 JavaScript</li>
-    </ul>
+        <h3>CSS 基础语法</h3>
+        <div class="code-block">
+            <code>
+/* 基础选择器和属性 */<br>
+body {<br>
+    font-family: 'Arial', sans-serif;<br>
+    background-color: #f0f0f0;<br>
+    margin: 0;<br>
+    padding: 0;<br>
+}<br>
+<br>
+/* 类选择器 */<br>
+.container {<br>
+    max-width: 1200px;<br>
+    margin: 0 auto;<br>
+    padding: 20px;<br>
+}<br>
+<br>
+/* ID选择器 */<br>
+#header {<br>
+    background-color: #3498db;<br>
+    color: white;<br>
+    padding: 20px;<br>
+    text-align: center;<br>
+}<br>
+<br>
+/* 伪类选择器 */<br>
+a:hover {<br>
+    color: #e74c3c;<br>
+    text-decoration: underline;<br>
+}<br>
+<br>
+/* 属性选择器 */<br>
+input[type="text"] {<br>
+    border: 1px solid #ddd;<br>
+    padding: 8px;<br>
+    border-radius: 4px;<br>
+}
+            </code>
+        </div>
 
-    <h2>总结</h2>
-    <p>HTML 是构建网页的基础语言，通过学习和掌握 HTML，您可以创建出结构清晰、内容丰富的网页。随着学习的深入，您还可以探索 HTML5 的新特性，以及结合 CSS 和 JavaScript，创建出更加动态和交互性强的网页应用。</p>
-    <p>希望这份简介能帮助您快速了解 HTML 的基础知识，开启您的 Web 开发之旅！</p>
+        <h3>CSS 布局示例 - Flexbox</h3>
+        <div class="code-block">
+            <code>
+/* Flexbox容器 */<br>
+.flex-container {<br>
+    display: flex;<br>
+    justify-content: space-between;<br>
+    align-items: center;<br>
+    flex-wrap: wrap;<br>
+    gap: 20px;<br>
+}<br>
+<br>
+/* Flex项目 */<br>
+.flex-item {<br>
+    flex: 1 1 300px; /* 增长 收缩 基础尺寸 */<br>
+    background-color: #f8f9fa;<br>
+    padding: 20px;<br>
+    border-radius: 8px;<br>
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);<br>
+}<br>
+<br>
+/* 响应式布局 */<br>
+@media (max-width: 768px) {<br>
+    .flex-container {<br>
+        flex-direction: column;<br>
+    }<br>
+    <br>
+    .flex-item {<br>
+        flex: 1 1 100%;<br>
+    }<br>
+}
+            </code>
+        </div>
 
-    <!-- 在页面底部也添加一个游戏按钮 -->
+        <h3>CSS 动画示例</h3>
+        <div class="code-block">
+            <code>
+/* 简单动画 */<br>
+@keyframes fadeIn {<br>
+    from {<br>
+        opacity: 0;<br>
+        transform: translateY(20px);<br>
+    }<br>
+    to {<br>
+        opacity: 1;<br>
+        transform: translateY(0);<br>
+    }<br>
+}<br>
+<br>
+.animate-fade-in {<br>
+    animation: fadeIn 0.5s ease-in-out;<br>
+}<br>
+<br>
+/* 过渡效果 */<br>
+.button {<br>
+    background-color: #3498db;<br>
+    color: white;<br>
+    padding: 10px 20px;<br>
+    border: none;<br>
+    border-radius: 4px;<br>
+    transition: all 0.3s ease;<br>
+}<br>
+<br>
+.button:hover {<br>
+    background-color: #2980b9;<br>
+    transform: translateY(-2px);<br>
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);<br>
+}
+            </code>
+        </div>
+
+        <h3>CSS 层叠性规则</h3>
+        <table class="comparison-table">
+            <tr>
+                <th>优先级规则</th>
+                <th>说明</th>
+                <th>示例</th>
+            </tr>
+            <tr>
+                <td>!important</td>
+                <td>最高优先级</td>
+                <td><code>color: red !important;</code></td>
+            </tr>
+            <tr>
+                <td>内联样式</td>
+                <td>写在HTML元素的style属性中</td>
+                <td><code>&lt;div style="color: blue;"&gt;</code></td>
+            </tr>
+            <tr>
+                <td>ID选择器</td>
+                <td>使用#标识符</td>
+                <td><code>#header { color: green; }</code></td>
+            </tr>
+            <tr>
+                <td>类选择器</td>
+                <td>使用.标识符</td>
+                <td><code>.title { color: purple; }</code></td>
+            </tr>
+            <tr>
+                <td>元素选择器</td>
+                <td>直接使用标签名</td>
+                <td><code>div { color: orange; }</code></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- JavaScript内容 -->
+    <div id="javascript" class="tab-content">
+        <h2>JavaScript - 网页的交互引擎</h2>
+        
+        <div class="tech-section">
+            <h3>什么是JavaScript？</h3>
+            <p>JavaScript是一种高级的、解释型的编程语言，是Web开发中不可或缺的脚本语言。它使网页具有交互性，能够响应用户操作、修改页面内容、与服务器通信等。</p>
+        </div>
+
+        <h3>JavaScript 核心特性</h3>
+        <ul>
+            <li><strong>动态类型</strong>：变量类型在运行时确定</li>
+            <li><strong>面向对象</strong>：支持对象、类、继承等概念</li>
+            <li><strong>函数式编程</strong>：支持高阶函数、闭包等</li>
+            <li><strong>事件驱动</strong>：基于事件循环的异步编程模型</li>
+            <li><strong>DOM操作</strong>：能够动态修改页面内容和结构</li>
+            <li><strong>AJAX通信</strong>：与服务器进行异步数据交换</li>
+        </ul>
+
+        <h3>JavaScript 基础语法</h3>
+        <div class="code-block">
+            <code>
+// 变量声明<br>
+let message = "Hello, World!";<br>
+const PI = 3.14159;<br>
+var count = 0;<br>
+<br>
+// 数据类型<br>
+let name = "张三";              // 字符串<br>
+let age = 25;                   // 数字<br>
+let isStudent = true;           // 布尔值<br>
+let data = null;                // 空值<br>
+let undefinedVar;               // 未定义<br>
+<br>
+// 数组和对象<br>
+let colors = ["red", "green", "blue"];<br>
+let person = {<br>
+    name: "李四",<br>
+    age: 30,<br>
+    city: "北京"<br>
+};<br>
+<br>
+// 函数定义<br>
+function greet(name) {<br>
+    return `你好，${name}！`;<br>
+}<br>
+<br>
+// 箭头函数<br>
+const add = (a, b) => a + b;<br>
+<br>
+// 条件语句<br>
+if (age >= 18) {<br>
+    console.log("成年人");<br>
+} else {<br>
+    console.log("未成年人");<br>
+}<br>
+<br>
+// 循环<br>
+for (let i = 0; i < colors.length; i++) {<br>
+    console.log(colors[i]);<br>
+}
+            </code>
+        </div>
+
+        <h3>JavaScript DOM操作</h3>
+        <div class="code-block">
+            <code>
+// 获取元素<br>
+const header = document.getElementById('header');<br>
+const buttons = document.getElementsByClassName('btn');<br>
+const paragraphs = document.getElementsByTagName('p');<br>
+<br>
+// 查询选择器<br>
+const mainContent = document.querySelector('.main-content');<br>
+const allLinks = document.querySelectorAll('a');<br>
+<br>
+// 修改元素内容和属性<br>
+header.textContent = '新的标题';<br>
+header.innerHTML = '<em>斜体标题</em>';<br>
+header.setAttribute('data-id', '123');<br>
+<br>
+// 修改样式<br>
+header.style.color = 'blue';<br>
+header.style.fontSize = '24px';<br>
+<br>
+// 创建和添加元素<br>
+const newDiv = document.createElement('div');<br>
+newDiv.className = 'new-element';<br>
+newDiv.textContent = '这是新创建的元素';<br>
+document.body.appendChild(newDiv);<br>
+<br>
+// 事件监听<br>
+header.addEventListener('click', function() {<br>
+    alert('标题被点击了！');<br>
+});<br>
+<br>
+// 移除元素<br>
+newDiv.remove();
+            </code>
+        </div>
+
+        <h3>JavaScript 异步编程</h3>
+        <div class="code-block">
+            <code>
+// 回调函数<br>
+function fetchData(callback) {<br>
+    setTimeout(() => {<br>
+        const data = { id: 1, name: '产品A' };<br>
+        callback(data);<br>
+    }, 1000);<br>
+}<br>
+<br>
+fetchData(function(data) {<br>
+    console.log('获取到的数据:', data);<br>
+});<br>
+<br>
+// Promise<br>
+function fetchDataPromise() {<br>
+    return new Promise((resolve, reject) => {<br>
+        setTimeout(() => {<br>
+            const success = true;<br>
+            if (success) {<br>
+                resolve({ id: 2, name: '产品B' });<br>
+            } else {<br>
+                reject('获取数据失败');<br>
+            }<br>
+        }, 1000);<br>
+    });<br>
+}<br>
+<br>
+fetchDataPromise()<br>
+    .then(data => console.log('Promise数据:', data))<br>
+    .catch(error => console.error('错误:', error));<br>
+<br>
+// async/await<br>
+async function getData() {<br>
+    try {<br>
+        const data = await fetchDataPromise();<br>
+        console.log('Async数据:', data);<br>
+    } catch (error) {<br>
+        console.error('Async错误:', error);<br>
+    }<br>
+}<br>
+<br>
+getData();
+            </code>
+        </div>
+
+        <h3>JavaScript 数组方法</h3>
+        <table class="comparison-table">
+            <tr>
+                <th>方法</th>
+                <th>描述</th>
+                <th>示例</th>
+            </tr>
+            <tr>
+                <td>map()</td>
+                <td>对数组每个元素执行函数，返回新数组</td>
+                <td><code>[1,2,3].map(x => x*2)</code> → [2,4,6]</td>
+            </tr>
+            <tr>
+                <td>filter()</td>
+                <td>过滤数组元素，返回符合条件的元素</td>
+                <td><code>[1,2,3,4].filter(x => x>2)</code> → [3,4]</td>
+            </tr>
+            <tr>
+                <td>reduce()</td>
+                <td>将数组元素减少为单个值</td>
+                <td><code>[1,2,3].reduce((a,b) => a+b)</code> → 6</td>
+            </tr>
+            <tr>
+                <td>forEach()</td>
+                <td>对数组每个元素执行函数，无返回值</td>
+                <td><code>[1,2,3].forEach(x => console.log(x))</code></td>
+            </tr>
+            <tr>
+                <td>find()</td>
+                <td>查找符合条件的第一个元素</td>
+                <td><code>[1,2,3].find(x => x>1)</code> → 2</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 三剑客协作内容 -->
+    <div id="integration" class="tab-content">
+        <h2>三剑客协作 - 构建现代Web应用</h2>
+        
+        <div class="tech-section">
+            <h3>三位一体的工作模式</h3>
+            <p>HTML、CSS和JavaScript就像一支默契的乐队：HTML是乐谱，定义结构和内容；CSS是乐器音色，决定外观和感觉；JavaScript是演奏技巧，创造交互和动态体验。只有三者完美配合，才能演奏出美妙的Web体验交响曲。</p>
+        </div>
+
+        <h3>协作示例：交互式待办事项列表</h3>
+        <div class="code-block">
+            <code>
+&lt;!-- HTML结构 --&gt;<br>
+&lt;div class="todo-container"&gt;<br>
+    &lt;h2&gt;我的待办事项&lt;/h2&gt;<br>
+    &lt;div class="input-group"&gt;<br>
+        &lt;input type="text" id="todoInput" placeholder="添加新任务..."&gt;<br>
+        &lt;button id="addBtn" class="btn-primary"&gt;添加&lt;/button&gt;<br>
+    &lt;/div&gt;<br>
+    &lt;ul id="todoList" class="todo-list"&gt;<br>
+        &lt;li class="todo-item"&gt;<br>
+            &lt;span class="todo-text"&gt;学习HTML5&lt;/span&gt;<br>
+            &lt;button class="btn-delete"&gt;删除&lt;/button&gt;<br>
+        &lt;/li&gt;<br>
+    &lt;/ul&gt;<br>
+&lt;/div&gt;<br>
+<br>
+&lt;!-- CSS样式 --&gt;<br>
+&lt;style&gt;<br>
+.todo-container {<br>
+    max-width: 400px;<br>
+    margin: 20px auto;<br>
+    padding: 20px;<br>
+    background: white;<br>
+    border-radius: 8px;<br>
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);<br>
+}<br>
+<br>
+.input-group {<br>
+    display: flex;<br>
+    margin-bottom: 20px;<br>
+}<br>
+<br>
+#todoInput {<br>
+    flex: 1;<br>
+    padding: 10px;<br>
+    border: 1px solid #ddd;<br>
+    border-radius: 4px 0 0 4px;<br>
+}<br>
+<br>
+.btn-primary {<br>
+    padding: 10px 20px;<br>
+    background: #3498db;<br>
+    color: white;<br>
+    border: none;<br>
+    border-radius: 0 4px 4px 0;<br>
+    cursor: pointer;<br>
+}<br>
+<br>
+.todo-list {<br>
+    list-style: none;<br>
+    padding: 0;<br>
+}<br>
+<br>
+.todo-item {<br>
+    display: flex;<br>
+    justify-content: space-between;<br>
+    align-items: center;<br>
+    padding: 10px;<br>
+    margin-bottom: 8px;<br>
+    background: #f8f9fa;<br>
+    border-radius: 4px;<br>
+}<br>
+<br>
+.btn-delete {<br>
+    background: #e74c3c;<br>
+    color: white;<br>
+    border: none;<br>
+    padding: 5px 10px;<br>
+    border-radius: 4px;<br>
+    cursor: pointer;<br>
+}<br>
+&lt;/style&gt;
+            </code>
+        </div>
+
+        <h3>JavaScript交互逻辑</h3>
+        <div class="code-block">
+            <code>
+// 获取DOM元素<br>
+const todoInput = document.getElementById('todoInput');<br>
+const addBtn = document.getElementById('addBtn');<br>
+const todoList = document.getElementById('todoList');<br>
+<br>
+// 添加待办事项<br>
+function addTodo() {<br>
+    const todoText = todoInput.value.trim();<br>
+    <br>
+    if (todoText === '') {<br>
+        alert('请输入待办事项！');<br>
+        return;<br>
+    }<br>
+    <br>
+    // 创建新的待办事项元素<br>
+    const todoItem = document.createElement('li');<br>
+    todoItem.className = 'todo-item';<br>
+    <br>
+    const todoTextSpan = document.createElement('span');<br>
+    todoTextSpan.className = 'todo-text';<br>
+    todoTextSpan.textContent = todoText;<br>
+    <br>
+    const deleteBtn = document.createElement('button');<br>
+    deleteBtn.className = 'btn-delete';<br>
+    deleteBtn.textContent = '删除';<br>
+    <br>
+    // 添加删除功能<br>
+    deleteBtn.addEventListener('click', function() {<br>
+        todoItem.remove();<br>
+    });<br>
+    <br>
+    // 组装元素<br>
+    todoItem.appendChild(todoTextSpan);<br>
+    todoItem.appendChild(deleteBtn);<br>
+    <br>
+    // 添加到列表<br>
+    todoList.appendChild(todoItem);<br>
+    <br>
+    // 清空输入框<br>
+    todoInput.value = '';<br>
+}<br>
+<br>
+// 绑定事件<br>
+addBtn.addEventListener('click', addTodo);<br>
+<br>
+// 支持回车键添加<br>
+todoInput.addEventListener('keypress', function(e) {<br>
+    if (e.key === 'Enter') {<br>
+        addTodo();<br>
+    }<br>        
+});<br>
+<br>
+// 使用localStorage保存数据<br>
+function saveTodos() {<br>
+    const todos = [];<br>
+    document.querySelectorAll('.todo-text').forEach(span => {<br>
+        todos.push(span.textContent);<br>
+    });<br>
+    localStorage.setItem('todos', JSON.stringify(todos));<br>
+}<br>
+<br>
+// 从localStorage加载数据<br>
+function loadTodos() {<br>
+    const savedTodos = localStorage.getItem('todos');<br>
+    if (savedTodos) {<br>
+        const todos = JSON.parse(savedTodos);<br>
+        todos.forEach(todo => {<br>
+            todoInput.value = todo;<br>
+            addTodo();<br>
+        });<br>
+    }<br>
+}<br>
+<br>
+// 页面加载时恢复数据<br>
+window.addEventListener('load', loadTodos);
+            </code>
+        </div>
+
+        <h3>现代前端框架整合</h3>
+        <p>现代前端框架（如React、Vue、Angular）以组件化的方式重新组织HTML、CSS和JavaScript：</p>
+        <ul>
+            <li><strong>React</strong>：使用JSX语法将HTML结构融入JavaScript</li>
+            <li><strong>Vue</strong>：单文件组件（.vue文件）整合模板、样式和逻辑</li>
+            <li><strong>Angular</strong>：组件装饰器将三者有机结合</li>
+        </ul>
+
+        <h3>最佳实践建议</h3>
+        <table class="comparison-table">
+            <tr>
+                <th>实践类别</th>
+                <th>HTML</th>
+                <th>CSS</th>
+                <th>JavaScript</th>
+            </tr>
+            <tr>
+                <td>语义化</td>
+                <td>使用恰当的标签表达内容含义</td>
+                <td>使用BEM等命名约定</td>
+                <td>使用有意义的变量和函数名</td>
+            </tr>
+            <tr>
+                <td>可维护性</td>
+                <td>保持结构清晰，避免过度嵌套</td>
+                <td>模块化CSS，避免样式冲突</td>
+                <td>遵循单一职责原则，模块化代码</td>
+            </tr>
+            <tr>
+                <td>性能优化</td>
+                <td>减少DOM节点数量</td>
+                <td>压缩CSS文件，使用CSS雪碧图</td>
+                <td>异步加载脚本，减少重绘重排</td>
+            </tr>
+            <tr>
+                <td>可访问性</td>
+                <td>使用alt属性，语义化标签</td>
+                <td>确保颜色对比度，响应式字体</td>
+                <td>支持键盘导航，屏幕阅读器</td>
+            </tr>
+        </table>
+    </div>
+
+    <h2>学习路径与未来发展</h2>
+    <div class="tech-section">
+        <h3>循序渐进的学习路径</h3>
+        <ol>
+            <li><strong>第一阶段：基础掌握</strong>
+                <ul>
+                    <li>HTML：掌握基本标签、语义化、表单、多媒体</li>
+                    <li>CSS：学习选择器、盒模型、布局、响应式设计</li>
+                    <li>JavaScript：理解变量、函数、DOM操作、事件处理</li>
+                </ul>
+            </li>
+            <li><strong>第二阶段：进阶应用</strong>
+                <ul>
+                    <li>HTML5：学习Canvas、SVG、本地存储、WebSocket</li>
+                    <li>CSS3：掌握动画、变换、Grid布局、自定义属性</li>
+                    <li>JavaScript：深入ES6+、异步编程、模块化</li>
+                </ul>
+            </li>
+            <li><strong>第三阶段：框架与工具</strong>
+                <ul>
+                    <li>学习现代框架：React、Vue或Angular</li>
+                    <li>掌握构建工具：Webpack、Vite、Parcel</li>
+                    <li>了解TypeScript、测试框架、CI/CD</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>未来发展趋势</h3>
+        <ul>
+            <li><strong>Web组件标准化</strong>：Custom Elements、Shadow DOM等原生组件技术</li>
+            <li><strong>CSS-in-JS兴起</strong>：样式与组件的深度融合</li>
+            <li><strong>TypeScript普及</strong>：为JavaScript带来静态类型检查</li>
+            <li><strong>WebAssembly</strong>：为Web带来接近原生的性能</li>
+            <li><strong>AI辅助开发</strong>：智能化代码生成和优化</li>
+        </ul>
+    </div>
+
+    <!-- 页面底部游戏按钮 -->
     <div class="game-button-container">
         <button class="game-button" onclick="window.location.href='voxel-modules/index.html'">🎮 玩会游戏</button>
     </div>
 
+    <script>
+        // 标签页切换功能
+        function showTab(tabName) {
+            // 隐藏所有内容
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有标签的active类
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的内容
+            document.getElementById(tabName).classList.add('active');
+            
+            // 添加active类到点击的标签
+            event.target.classList.add('active');
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('前端三剑客指南已加载完成！');
+            
+            // 添加一些交互效果
+            const buttons = document.querySelectorAll('.game-button');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.05)';
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+    </script>
 </body>
 </html>
