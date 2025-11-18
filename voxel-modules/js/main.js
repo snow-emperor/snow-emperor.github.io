@@ -24,21 +24,32 @@ scene.add(dirLight, new THREE.AmbientLight(0xffffff, 0.4));
 let chunkMgr, player;
 
 export function startGame(config) {
-  document.getElementById('ui-container').style.display = 'none';
-  showHUD();
-  chunkMgr = new ChunkMgr();
-  player = new Player(chunkMgr);
-  player.mode = config.mode;
-  initNuclear();
-  pullSkins();
-  animate();
+  try {
+    document.getElementById('ui-container').style.display = 'none';
+    showHUD();
+    chunkMgr = new ChunkMgr();
+    player = new Player(chunkMgr);
+    player.mode = config.mode;
+    initNuclear();
+    pullSkins();
+    animate();
+  } catch (e) {
+    console.error('启动游戏失败:', e);
+    document.getElementById('ui-container').style.display = 'block';
+    showMainMenu();
+    alert('启动游戏失败: ' + e.message);
+  }
 }
 
 function animate() {
   requestAnimationFrame(animate);
-  player.update();
-  chunkMgr.update(player.position);
-  updateNuclear();
+  try {
+    player.update();
+    chunkMgr.update(player.position);
+    updateNuclear();
+  } catch (e) {
+    console.error('游戏循环错误:', e);
+  }
   renderer.render(scene, camera);
 }
 
