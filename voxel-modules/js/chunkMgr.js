@@ -3,7 +3,7 @@ import { buildChunkInstanced } from './mesher.js';
 import { scene } from './main.js';
 import { atomAt } from './worldgen.js';
 
-const CS = 32, RENDER_DIST = 2;
+const CS = 32, RENDER_DIST = 3; // 增加渲染距离
 const CHUNK_SIZE = 10; // 可视化区块大小（米）
 
 function key(cx, cy, cz) { return `${cx}_${cy}_${cz}`; }
@@ -15,9 +15,10 @@ export class ChunkMgr {
     this.useWorkers = false; // 默认不使用Workers，避免CORS问题
     this.camera = null;
     this.chunkLoadQueue = []; // 区块加载队列
-    this.maxChunksPerFrame = 1; // 每帧最多加载的区块数
+    this.maxChunksPerFrame = 2; // 每帧最多加载的区块数
     this.loadedChunkCount = 0; // 已加载区块计数
-    this.maxTotalChunks = 27; // 最大总区块数 (3x3x3)
+    this.maxTotalChunks = 125; // 最大总区块数 (5x5x5)
+    this.lastPlayerPos = new THREE.Vector3();
     
     // 尝试初始化Web Workers
     try {
@@ -34,6 +35,12 @@ export class ChunkMgr {
   
   update(playerPos, camera) {
     this.camera = camera;
+    
+    // 只在玩家移动足够距离时才更新区块
+    const distance = this.lastPlayerPos.distanceTo(playerPos);
+    if (distance < 5) return;
+    
+    this.lastPlayerPos.copy(playerPos);
     const pcx = Math.floor(playerPos.x / CS), pcy = Math.floor(playerPos.y / CS), pcz = Math.floor(playerPos.z / CS);
     const needed = new Set();
     const neededChunks = [];

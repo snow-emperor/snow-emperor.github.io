@@ -5,6 +5,9 @@ import { showMainMenu } from './ui/mainMenu.js';
 import { showHUD, updateFPS } from './ui/hud.js';
 import { initNuclear, updateNuclear } from './reactions/nuclear.js';
 import { saveManager } from './saveManager.js';
+import { textureManager } from './textureManager.js';
+import { ELEMENTS } from './atomData.js';
+import { OBJECTS } from './molecules.js';
 
 export const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x87ceeb, 50, 300);
@@ -23,6 +26,21 @@ scene.add(dirLight, new THREE.AmbientLight(0xffffff, 0.4));
 
 let chunkMgr, player;
 let gameConfig = null;
+
+// 初始化纹理系统
+function initTextures() {
+  try {
+    // 创建元素纹理图集
+    textureManager.createElementAtlas(ELEMENTS);
+    
+    // 创建物体纹理图集
+    textureManager.createObjectTextures(OBJECTS);
+    
+    console.log('纹理系统初始化完成');
+  } catch (e) {
+    console.error('纹理系统初始化失败:', e);
+  }
+}
 
 export function startGame(config) {
   console.log('开始游戏，配置:', config);
@@ -49,6 +67,48 @@ export function startGame(config) {
     }
     showMainMenu();
     alert('启动游戏失败: ' + e.message);
+  }
+}
+
+// 列出所有存档
+export function listSaves() {
+  try {
+    return saveManager.listSaves();
+  } catch (e) {
+    console.error('获取存档列表失败:', e);
+    return [];
+  }
+}
+
+// 删除存档
+export function deleteSave(saveName) {
+  try {
+    const success = saveManager.deleteSave(saveName);
+    if (success) {
+      // 显示删除成功提示
+      const indicator = document.getElementById('delete-indicator');
+      if (indicator) {
+        indicator.textContent = `存档 "${saveName}" 已删除`;
+        indicator.style.display = 'block';
+        setTimeout(() => {
+          indicator.style.display = 'none';
+        }, 2000);
+      }
+    }
+    return success;
+  } catch (e) {
+    console.error('删除存档失败:', e);
+    return false;
+  }
+}
+
+// 检查存档是否存在
+export function saveExists(saveName) {
+  try {
+    return saveManager.saveExists(saveName);
+  } catch (e) {
+    console.error('检查存档存在性失败:', e);
+    return false;
   }
 }
 
@@ -165,10 +225,12 @@ function animate() {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM加载完成，显示主菜单');
+    initTextures(); // 初始化纹理
     showMainMenu();
   });
 } else {
   console.log('直接显示主菜单');
+  initTextures(); // 初始化纹理
   showMainMenu();   // 首屏
 }
 

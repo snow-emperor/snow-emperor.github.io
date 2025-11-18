@@ -1,64 +1,24 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
 import { ELEMENTS } from './atomData.js';
 import { OBJECTS } from './molecules.js';
+import { textureManager } from './textureManager.js';
 
 const CS = 32, atlasRows = 8;
 const geo = new THREE.PlaneGeometry(0.1, 0.1); // 0.1 nm
-let atlasTex = null;
 
 function getAtlasTex() {
-  if (atlasTex) return atlasTex;
-  const can = document.createElement('canvas');
-  can.width = can.height = 256;
-  const ctx = can.getContext('2d');
-  for (let i = 0; i < 118; i++) {
-    const x = (i % 8) * 32, y = Math.floor(i / 8) * 32;
-    // 确保元素存在且有color属性
-    if (ELEMENTS[i] && ELEMENTS[i].color !== undefined) {
-      ctx.fillStyle = `#${ELEMENTS[i].color.toString(16).padStart(6, '0')}`;
-    } else {
-      // 默认颜色
-      ctx.fillStyle = '#808080';
-    }
-    ctx.fillRect(x, y, 32, 32);
-    ctx.strokeStyle = '#000'; 
-    ctx.strokeRect(x, y, 32, 32);
-    
-    // 绘制元素符号
-    if (ELEMENTS[i] && ELEMENTS[i].symbol) {
-      ctx.fillStyle = '#fff'; 
-      ctx.font = '10px sans'; 
-      ctx.fillText(ELEMENTS[i].symbol, x + 4, y + 12);
-    }
-  }
-  atlasTex = new THREE.CanvasTexture(can);
-  atlasTex.magFilter = THREE.NearestFilter;
-  atlasTex.minFilter = THREE.NearestFilter;
-  return atlasTex;
-}
-
-// 获取颜色（支持物体）
-function getColorForId(id) {
-  // 检查是否是物体
-  if (id & 0x8000) {
-    // 物体ID
-    const objectId = id & 0x7FFF;
-    const objectKeys = Object.keys(OBJECTS);
-    if (objectId < objectKeys.length) {
-      return OBJECTS[objectKeys[objectId]].color;
-    }
-    return 0x888888; // 默认颜色
-  }
-  // 原子ID
-  if (id < ELEMENTS.length && ELEMENTS[id] && ELEMENTS[id].color !== undefined) {
-    return ELEMENTS[id].color;
-  }
-  return 0x000000;
+  // 尝试获取已有的纹理
+  const existingTexture = textureManager.getTexture('objectAtlas');
+  if (existingTexture) return existingTexture;
+  
+  // 创建新的物体纹理图集
+  return textureManager.createObjectTextures(OBJECTS);
 }
 
 export function buildChunkInstanced(chunk, cx, cy, cz, world) {
+  const atlasTex = getAtlasTex();
   const atlasMat = new THREE.MeshLambertMaterial({ 
-    map: getAtlasTex(),
+    map: atlasTex,
     transparent: true,
     opacity: 0.95
   });

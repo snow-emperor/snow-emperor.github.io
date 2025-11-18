@@ -17,6 +17,7 @@ export class Player {
     this.energy = 100; // 新增能量系统
     this.selectedID = 1;
     this.selectedSlot = 0;
+    this.inventory = {}; // 玩家物品栏
     this.lastBreakTime = 0;
     this.lastPlaceTime = 0;
     this.onGround = false;
@@ -58,7 +59,14 @@ export class Player {
       case 'Digit5': if (v) this.selectSlot(4); break;
       case 'KeyF': if (v) this.toggleFlight(); break;
       case 'KeyE': if (v) this.useItem(); break;
+      case 'KeyP': if (v) this.showInventory(); break; // 显示物品栏
     }
+  }
+  
+  showInventory() {
+    // 显示物品栏
+    console.log('物品栏:', this.inventory);
+    alert('物品栏内容请查看控制台');
   }
   
   selectSlot(slot) {
@@ -245,7 +253,8 @@ export class Player {
       rad: this.rad,
       energy: this.energy,
       mode: this.mode,
-      difficulty: this.difficulty
+      difficulty: this.difficulty,
+      inventory: this.inventory
     };
   }
   
@@ -260,5 +269,6 @@ export class Player {
     if (data.energy !== undefined) this.energy = data.energy;
     if (data.mode) this.mode = data.mode;
     if (data.difficulty) this.difficulty = data.difficulty;
+    if (data.inventory) this.inventory = data.inventory;
   }
 }
