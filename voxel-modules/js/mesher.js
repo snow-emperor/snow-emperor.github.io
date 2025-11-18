@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
 import { ELEMENTS } from './atomData.js';
 
 const CS = 1024, atlasRows = 8;

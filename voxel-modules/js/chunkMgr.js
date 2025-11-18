@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
 import { buildChunkInstanced } from './mesher.js';
 import { scene } from './main.js';
 import { atomAt } from './worldgen.js';

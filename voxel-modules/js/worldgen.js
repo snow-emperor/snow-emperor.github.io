@@ -1,5 +1,5 @@
 import { ELEMENTS, SYM2ID } from './atomData.js';
-import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
+import { ImprovedNoise } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/math/ImprovedNoise.js';
 const noise = new ImprovedNoise();
 
 export function density(wx, wy, wz) {

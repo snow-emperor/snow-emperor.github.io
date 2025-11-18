@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
 import { ChunkMgr } from './chunkMgr.js';
 import { Player } from './player.js';
 import { showMainMenu } from './ui/mainMenu.js';
@@ -24,8 +24,14 @@ scene.add(dirLight, new THREE.AmbientLight(0xffffff, 0.4));
 let chunkMgr, player;
 
 export function startGame(config) {
+  console.log('开始游戏，配置:', config);
   try {
-    document.getElementById('ui-container').style.display = 'none';
+    const uiContainer = document.getElementById('ui-container');
+    if (uiContainer) {
+      uiContainer.style.display = 'none';
+    } else {
+      console.error('未找到ui-container元素');
+    }
     showHUD();
     chunkMgr = new ChunkMgr();
     player = new Player(chunkMgr);
@@ -35,7 +41,10 @@ export function startGame(config) {
     animate();
   } catch (e) {
     console.error('启动游戏失败:', e);
-    document.getElementById('ui-container').style.display = 'block';
+    const uiContainer = document.getElementById('ui-container');
+    if (uiContainer) {
+      uiContainer.style.display = 'block';
+    }
     showMainMenu();
     alert('启动游戏失败: ' + e.message);
   }
@@ -44,8 +53,8 @@ export function startGame(config) {
 function animate() {
   requestAnimationFrame(animate);
   try {
-    player.update();
-    chunkMgr.update(player.position);
+    if (player) player.update();
+    if (chunkMgr) chunkMgr.update(player.position);
     updateNuclear();
   } catch (e) {
     console.error('游戏循环错误:', e);
@@ -53,7 +62,13 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-showMainMenu();   // 首屏
+// 等待DOM加载完成后显示主菜单
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', showMainMenu);
+} else {
+  showMainMenu();   // 首屏
+}
+
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
