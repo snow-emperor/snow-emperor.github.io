@@ -55,7 +55,7 @@ function animate() {
   requestAnimationFrame(animate);
   try {
     if (player) player.update();
-    if (chunkMgr) chunkMgr.update(player.position);
+    if (chunkMgr) chunkMgr.update(player.position, camera);
     updateNuclear();
     updateFPS();
   } catch (e) {

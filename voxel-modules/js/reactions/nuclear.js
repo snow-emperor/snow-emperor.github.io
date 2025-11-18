@@ -43,14 +43,22 @@ function spawnEnergy(x, y, z, MeV) {
 export function updateNuclear() {
   const dummy = new THREE.Object3D();
   let ni = 0, gi = 0;
-  neutronPool.forEach((p, idx) => {
+  
+  // 使用 for 循环反向遍历，避免 splice 导致的索引错位问题
+  for (let i = neutronPool.length - 1; i >= 0; i--) {
+    const p = neutronPool[i];
     p.pos.addScaledVector(p.dir, 0.3);
     p.life--;
-    if (p.life <= 0) { neutronPool.splice(idx, 1); return; }
-    dummy.position.copy(p.pos).multiplyScalar(0.1);
-    dummy.updateMatrix();
-    instN.setMatrixAt(ni++, dummy.matrix);
-  });
+    
+    if (p.life <= 0) {
+      neutronPool.splice(i, 1);
+    } else {
+      dummy.position.copy(p.pos).multiplyScalar(0.1);
+      dummy.updateMatrix();
+      instN.setMatrixAt(ni++, dummy.matrix);
+    }
+  }
+  
   instN.instanceMatrix.needsUpdate = true;
   instN.count = ni;
 }

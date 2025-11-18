@@ -62,12 +62,15 @@ export class Player {
   
   selectSlot(slot) {
     this.selectedSlot = slot;
+    // 根据槽位索引获取对应的物品ID（假设物品栏元素有data-id属性）
     const slotElement = document.getElementById('slot' + slot);
     if (slotElement) {
       // 移除其他槽位的高亮
       document.querySelectorAll('.atom-slot').forEach(el => el.style.borderColor = '#666');
       // 高亮选中的槽位
       slotElement.style.borderColor = '#2196F3';
+      // 更新选中的原子ID
+      this.selectedID = parseInt(slotElement.dataset.id) || (slot + 1);
     }
   }
   
