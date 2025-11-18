@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title>原子级沙盒 2.0</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="icon" href="favicon.ico"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/math/ImprovedNoise.js"></script>
+</head>
+<body>
+<div id="ui-container">
+  <div id="main-menu" class="panel">
+    <h1>原子级沙盒 2.0</h1>
+    <button id="btn-new">新建世界</button>
+    <button id="btn-continue">继续</button>
+    <button id="btn-market">皮肤市场</button>
+  </div>
+  <div id="create-panel" class="panel hidden">
+    <h2>创建世界</h2>
+    <label>世界名称 <input id="world-name" value="新世界"/></label>
+    <label>种子 <input id="world-seed" type="number" value="12345"/></label>
+    <label>模式
+      <select id="world-mode">
+        <option value="creative">创造</option>
+        <option value="survival">生存</option>
+      </select>
+    </label>
+    <button id="btn-create">生成</button>
+    <button id="btn-back">返回</button>
+  </div>
+  <div id="hud" class="hidden">
+    <div id="hud-left">
+      <div id="hp">❤ 20</div>
+      <div id="food">🍖 20</div>
+      <div id="rad">☢ 0</div>
+    </div>
+    <div id="hud-right">
+      <div id="coords">0 0 0</div>
+      <div id="mode">生存</div>
+    </div>
+    <div id="hotbar"></div>
+  </div>
+  <div id="market" class="panel hidden"></div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
