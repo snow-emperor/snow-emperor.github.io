@@ -29,13 +29,15 @@ export function showCreatePanel() {
         const nameInput = document.getElementById('world-name');
         const seedInput = document.getElementById('world-seed');
         const modeSelect = document.getElementById('world-mode');
+        const difficultySelect = document.getElementById('world-difficulty');
         
-        console.log('表单元素:', { nameInput, seedInput, modeSelect });
+        console.log('表单元素:', { nameInput, seedInput, modeSelect, difficultySelect });
         
         const cfg = {
           name: nameInput ? nameInput.value : '新世界',
           seed: seedInput ? parseInt(seedInput.value) : 12345,
-          mode: modeSelect ? modeSelect.value : 'survival'
+          mode: modeSelect ? modeSelect.value : 'survival',
+          difficulty: difficultySelect ? difficultySelect.value : 'normal'
         };
         
         console.log('配置:', cfg);

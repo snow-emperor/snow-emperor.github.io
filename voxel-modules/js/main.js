@@ -2,7 +2,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 import { ChunkMgr } from './chunkMgr.js';
 import { Player } from './player.js';
 import { showMainMenu } from './ui/mainMenu.js';
-import { showHUD } from './ui/hud.js';
+import { showHUD, updateFPS } from './ui/hud.js';
 import { initNuclear, updateNuclear } from './reactions/nuclear.js';
 import { pullSkins } from './reactions/skins.js';
 
@@ -35,7 +35,8 @@ export function startGame(config) {
     showHUD();
     chunkMgr = new ChunkMgr();
     player = new Player(chunkMgr);
-    player.mode = config.mode;
+    player.mode = config.mode || 'survival';
+    player.difficulty = config.difficulty || 'normal';
     initNuclear();
     pullSkins();
     animate();
@@ -56,6 +57,7 @@ function animate() {
     if (player) player.update();
     if (chunkMgr) chunkMgr.update(player.position);
     updateNuclear();
+    updateFPS();
   } catch (e) {
     console.error('游戏循环错误:', e);
   }
@@ -64,8 +66,12 @@ function animate() {
 
 // 等待DOM加载完成后显示主菜单
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', showMainMenu);
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM加载完成，显示主菜单');
+    showMainMenu();
+  });
 } else {
+  console.log('直接显示主菜单');
   showMainMenu();   // 首屏
 }
 

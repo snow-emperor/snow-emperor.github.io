@@ -4,6 +4,7 @@ import { scene } from './main.js';
 import { atomAt } from './worldgen.js';
 
 const CS = 1024, RENDER_DIST = 4;
+const CHUNK_SIZE = 10; // 可视化区块大小（米）
 
 function key(cx, cy, cz) { return `${cx}_${cy}_${cz}`; }
 
@@ -12,6 +13,7 @@ export class ChunkMgr {
     this.chunks = new Map();
     this.dirtyQueue = [];
     this.useWorkers = false; // 默认不使用Workers，避免CORS问题
+    this.camera = null;
     
     // 尝试初始化Web Workers
     try {
@@ -26,20 +28,32 @@ export class ChunkMgr {
     }
   }
   
-  update(playerPos) {
+  update(playerPos, camera) {
+    this.camera = camera;
     const pcx = Math.floor(playerPos.x / CS), pcy = Math.floor(playerPos.y / CS), pcz = Math.floor(playerPos.z / CS);
     const needed = new Set();
+    
+    // 优先加载玩家附近的区块
     for (let dx = -RENDER_DIST; dx <= RENDER_DIST; dx++) {
       for (let dy = -RENDER_DIST; dy <= RENDER_DIST; dy++) {
-        for (let dz = -RENDER_DIST; dz <= RENDER_DIST; dz++) needed.add(key(pcx + dx, pcy + dy, pcz + dz));
+        for (let dz = -RENDER_DIST; dz <= RENDER_DIST; dz++) {
+          const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+          if (dist <= RENDER_DIST) {
+            needed.add(key(pcx + dx, pcy + dy, pcz + dz));
+          }
+        }
       }
     }
+    
+    // 移除不需要的区块
     for (const [k, ch] of this.chunks) {
       if (!needed.has(k)) { 
         if (ch.meshes) ch.meshes.forEach(m => scene.remove(m)); 
         this.chunks.delete(k); 
       }
     }
+    
+    // 添加新需要的区块
     for (const k of needed) {
       if (!this.chunks.has(k)) {
         const [cx, cy, cz] = k.split('_').map(Number);
@@ -56,6 +70,7 @@ export class ChunkMgr {
         }
       }
     }
+    
     if (this.dirtyQueue.length) { 
       const ch = this.dirtyQueue.shift(); 
       this.rebuildChunk(ch); 

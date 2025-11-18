@@ -19,11 +19,20 @@ function getAtlasTex() {
   }
   atlasTex = new THREE.CanvasTexture(can);
   atlasTex.magFilter = THREE.NearestFilter;
+  atlasTex.minFilter = THREE.NearestFilter;
   return atlasTex;
 }
 
 export function buildChunkInstanced(chunk, cx, cy, cz, world) {
-  const atlasMat = new THREE.MeshLambertMaterial({ map: getAtlasTex() });
+  const atlasMat = new THREE.MeshLambertMaterial({ 
+    map: getAtlasTex(),
+    transparent: true,
+    opacity: 0.95
+  });
+  
+  // 启用视锥剔除
+  atlasMat.frustumCulled = true;
+  
   const meshes = [];
   const dirs = [
     { n: [0, 0, 1], rot: new THREE.Euler(0, 0, 0) },
@@ -33,12 +42,14 @@ export function buildChunkInstanced(chunk, cx, cy, cz, world) {
     { n: [1, 0, 0], rot: new THREE.Euler(0, Math.PI / 2, 0) },
     { n: [-1, 0, 0], rot: new THREE.Euler(0, -Math.PI / 2, 0) }
   ];
+  
   for (let f = 0; f < 6; f++) {
     const { n, rot } = dirs[f];
     const count = countFaces(chunk, n, world, cx, cy, cz);
     if (!count) continue;
     const mesh = new THREE.InstancedMesh(geo, atlasMat, count);
     mesh.count = count;
+    mesh.frustumCulled = true; // 启用视锥剔除
     fillInst(mesh, chunk, n, rot, world, cx, cy, cz, f);
     meshes.push(mesh);
   }
@@ -81,4 +92,8 @@ function fillInst(mesh, chunk, n, rot, world, cx, cy, cz, f) {
       }
     }
   }
+  
+  // 标记更新
+  if (mesh.instanceMatrix) mesh.instanceMatrix.needsUpdate = true;
+  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
 }
