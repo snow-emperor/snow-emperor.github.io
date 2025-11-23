@@ -1,0 +1,674 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Microsoft YaHei', sans-serif;
+}
+
+body {
+    overflow: hidden;
+    background-color: #000;
+}
+
+/* 加载界面 */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    background-image: url('../assets/textures/loading-bg.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.loading-content {
+    text-align: center;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid #4a6fa5;
+    box-shadow: 0 0 20px rgba(74, 111, 165, 0.5);
+}
+
+.loading-content h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: #a0c8ff;
+    text-shadow: 0 0 10px rgba(160, 200, 255, 0.7);
+}
+
+.loading-bar {
+    width: 300px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 15px 0;
+    border: 1px solid #4a6fa5;
+}
+
+.loading-progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, #4a6fa5, #a0c8ff);
+    transition: width 0.3s ease;
+}
+
+#loading-text {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+/* 游戏容器 */
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+#game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* UI面板通用样式 */
+.panel {
+    position: absolute;
+    background-color: rgba(10, 20, 40, 0.85);
+    border: 1px solid #4a6fa5;
+    border-radius: 8px;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(74, 111, 165, 0.4);
+    z-index: 100;
+}
+
+.panel.hidden {
+    display: none;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #4a6fa5;
+    background-color: rgba(20, 40, 80, 0.5);
+}
+
+.panel-header h2 {
+    font-size: 18px;
+    color: #a0c8ff;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.panel-content {
+    padding: 15px;
+}
+
+/* 主界面UI */
+#main-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* 让UI不阻挡游戏交互 */
+    z-index: 50;
+}
+
+#top-ui {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    pointer-events: none;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.player-level {
+    background-color: rgba(74, 111, 165, 0.7);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-weight: bold;
+}
+
+.player-name {
+    font-size: 16px;
+    color: #a0c8ff;
+}
+
+.resources {
+    display: flex;
+    gap: 15px;
+}
+
+.gold-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: rgba(218, 165, 32, 0.2);
+    padding: 5px 10px;
+    border-radius: 15px;
+    border: 1px solid rgba(218, 165, 32, 0.5);
+}
+
+.gold-icon {
+    width: 16px;
+    height: 16px;
+    background-image: url('../assets/icons/gold.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+#bottom-ui {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    pointer-events: none;
+}
+
+/* 状态条通用样式 */
+.health-bar-container,
+.mana-bar-container,
+.exp-bar-container {
+    width: 250px;
+    pointer-events: auto;
+}
+
+.bar-label {
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: #a0c8ff;
+}
+
+.health-bar,
+.mana-bar,
+.exp-bar {
+    position: relative;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #4a6fa5;
+}
+
+.bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+#health-bar {
+    background: linear-gradient(to right, #8b0000, #ff4500);
+}
+
+#mana-bar {
+    background: linear-gradient(to right, #00008b, #4169e1);
+}
+
+#exp-bar {
+    background: linear-gradient(to right, #2e8b57, #3cb371);
+}
+
+.health-bar span,
+.mana-bar span,
+.exp-bar span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    color: #fff;
+    text-shadow: 0 0 2px #000;
+    z-index: 1;
+}
+
+/* 咒语槽 */
+.spell-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    pointer-events: auto;
+}
+
+.spell-icon {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px solid #4a6fa5;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.spell-placeholder {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.spell-info {
+    font-size: 12px;
+    text-align: center;
+    max-width: 100px;
+}
+
+/* 属性面板 */
+#attributes-panel {
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    width: 300px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.attribute-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(74, 111, 165, 0.3);
+}
+
+.attr-name {
+    color: #a0c8ff;
+}
+
+.equipment-section {
+    margin-top: 20px;
+}
+
+.equipment-section h3 {
+    margin-bottom: 10px;
+    color: #a0c8ff;
+    font-size: 16px;
+}
+
+.equipment-slot {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(74, 111, 165, 0.3);
+}
+
+/* 咒语面板 */
+#spells-panel {
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    width: 350px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.spells-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.spell-item {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #4a6fa5;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.spell-item:hover {
+    background-color: rgba(74, 111, 165, 0.3);
+    border-color: #a0c8ff;
+}
+
+.spell-item.selected {
+    border-color: #ffd700;
+    background-color: rgba(255, 215, 0, 0.2);
+}
+
+.spell-item.locked {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.spell-item.locked:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-color: #4a6fa5;
+}
+
+.spell-icon-container {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 5px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spell-name {
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.spell-cost {
+    font-size: 12px;
+    color: #4169e1;
+}
+
+.spell-cooldown {
+    font-size: 12px;
+    color: #ff4500;
+}
+
+/* 任务面板 */
+#quests-panel {
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.quest-section {
+    margin-bottom: 20px;
+}
+
+.quest-section h3 {
+    margin-bottom: 10px;
+    color: #a0c8ff;
+    font-size: 16px;
+    border-bottom: 1px solid #4a6fa5;
+    padding-bottom: 5px;
+}
+
+.quest-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.quest-item {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #4a6fa5;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.quest-item:hover {
+    background-color: rgba(74, 111, 165, 0.3);
+}
+
+.quest-item.completed {
+    border-color: #2e8b57;
+}
+
+.quest-item.in-progress {
+    border-color: #ffd700;
+}
+
+.quest-item.locked {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.quest-item.locked:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.quest-title {
+    font-size: 14px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.quest-status {
+    font-size: 12px;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.quest-status.completed {
+    background-color: rgba(46, 139, 87, 0.5);
+}
+
+.quest-status.in-progress {
+    background-color: rgba(255, 215, 0, 0.3);
+}
+
+.quest-status.locked {
+    background-color: rgba(128, 128, 128, 0.3);
+}
+
+.quest-description {
+    font-size: 12px;
+    color: #ccc;
+}
+
+/* 战斗面板 */
+#combat-panel {
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+}
+
+.enemy-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.enemy-name {
+    font-size: 16px;
+    color: #ff4500;
+}
+
+.enemy-level {
+    color: #ccc;
+}
+
+.enemy-health-bar {
+    position: relative;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #4a6fa5;
+}
+
+#enemy-health-bar {
+    background: linear-gradient(to right, #8b0000, #ff4500);
+}
+
+.enemy-health-bar span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    color: #fff;
+    text-shadow: 0 0 2px #000;
+    z-index: 1;
+}
+
+/* 对话框 */
+#dialogue-box {
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+}
+
+.dialogue-speaker {
+    font-size: 16px;
+    color: #a0c8ff;
+    margin-bottom: 10px;
+}
+
+.dialogue-text {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.dialogue-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dialogue-option {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #4a6fa5;
+    border-radius: 5px;
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dialogue-option:hover {
+    background-color: rgba(74, 111, 165, 0.3);
+}
+
+/* 游戏结束界面 */
+.screen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+}
+
+.screen-content {
+    background-color: rgba(10, 20, 40, 0.9);
+    border: 1px solid #4a6fa5;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(74, 111, 165, 0.5);
+}
+
+.screen-content h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: #a0c8ff;
+}
+
+.screen-content p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.screen-content button {
+    background-color: #4a6fa5;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.screen-content button:hover {
+    background-color: #5a7fb5;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    #attributes-panel,
+    #spells-panel,
+    #quests-panel {
+        width: 90%;
+        max-width: 350px;
+    }
+
+    #attributes-panel,
+    #quests-panel {
+        right: 5%;
+        transform: translateY(-50%);
+    }
+
+    #spells-panel {
+        left: 5%;
+        transform: translateY(-50%);
+    }
+
+    .health-bar-container,
+    .mana-bar-container,
+    .exp-bar-container {
+        width: 150px;
+    }
+
+    #dialogue-box {
+        width: 90%;
+        max-width: 500px;
+    }
+}
