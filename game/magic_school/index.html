@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>埃瑟里亚魔法大陆</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+
+</head>
+
+<body>
+    <!-- 加载界面 -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <h1>埃瑟里亚魔法大陆</h1>
+            <div class="loading-bar">
+                <div id="loading-progress" class="loading-progress"></div>
+            </div>
+            <p id="loading-text">正在加载游戏资源... 0%</p>
+        </div>
+    </div>
+
+    <!-- 游戏主界面 -->
+    <div id="game-container">
+        <!-- Three.js 3D渲染画布 -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- 主界面UI -->
+        <div id="main-ui">
+            <!-- 顶部UI -->
+            <div id="top-ui">
+                <div class="player-info">
+                    <div class="player-level">Lv.<span id="level-value">1</span></div>
+                    <div class="player-name">魔法师</div>
+                </div>
+                <div class="resources">
+                    <div class="gold-container">
+                        <span class="gold-icon"></span>
+                        <span id="gold-value">100</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部UI -->
+            <div id="bottom-ui">
+                <!-- 生命值 -->
+                <div class="health-bar-container">
+                    <div class="bar-label">生命值</div>
+                    <div class="health-bar">
+                        <div id="health-bar" class="bar-fill"></div>
+                        <span id="health-value">100/100</span>
+                    </div>
+                </div>
+
+                <!-- 魔法值 -->
+                <div class="mana-bar-container">
+                    <div class="bar-label">魔法值</div>
+                    <div class="mana-bar">
+                        <div id="mana-bar" class="bar-fill"></div>
+                        <span id="mana-value">80/80</span>
+                    </div>
+                </div>
+
+                <!-- 经验值 -->
+                <div class="exp-bar-container">
+                    <div class="bar-label">经验值</div>
+                    <div class="exp-bar">
+                        <div id="exp-bar" class="bar-fill"></div>
+                        <span id="exp-value">0/100</span>
+                    </div>
+                </div>
+
+                <!-- 当前选中的咒语 -->
+                <div class="spell-slot">
+                    <div class="spell-icon" id="selected-spell-icon">
+                        <span class="spell-placeholder">无</span>
+                    </div>
+                    <div class="spell-info" id="selected-spell-info">
+                        <span>选择一个咒语</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 属性面板 -->
+        <div id="attributes-panel" class="panel hidden">
+            <div class="panel-header">
+                <h2>角色属性</h2>
+                <button type="button" class="close-btn" data-panel="attributes-panel">×</button>
+            </div>
+            <div class="panel-content">
+                <div class="attribute-row">
+                    <span class="attr-name">等级</span>
+                    <span class="attr-value" id="attr-level">1</span>
+                </div>
+                <div class="attribute-row">
+                    <span class="attr-name">经验值</span>
+                    <span class="attr-value" id="attr-exp">0/100</span>
+                </div>
+                <div class="attribute-row">
+                    <span class="attr-name">生命值</span>
+                    <span class="attr-value" id="attr-health">100/100</span>
+                </div>
+                <div class="attribute-row">
+                    <span class="attr-name">魔法值</span>
+                    <span class="attr-value" id="attr-mana">80/80</span>
+                </div>
+                <div class="attribute-row">
+                    <span class="attr-name">攻击力</span>
+                    <span class="attr-value" id="attr-attack">10</span>
+                </div>
+                <div class="attribute-row">
+                    <span class="attr-name">防御力</span>
+                    <span class="attr-value" id="attr-defense">5</span>
+                </div>
+                <div class="attribute-row">
+                    <span class="attr-name">施法速度</span>
+                    <span class="attr-value" id="attr-cast-speed">1.0x</span>
+                </div>
+                <div class="attribute-row">
+                    <span class="attr-name">元素专精</span>
+                    <span class="attr-value" id="attr-specialization">未选择</span>
+                </div>
+
+                <div class="equipment-section">
+                    <h3>装备</h3>
+                    <div class="equipment-slot">
+                        <span class="slot-name">魔杖</span>
+                        <span class="slot-value" id="equip-wand">基础魔杖</span>
+                    </div>
+                    <div class="equipment-slot">
+                        <span class="slot-name">法袍</span>
+                        <span class="slot-value" id="equip-robe">基础制服</span>
+                    </div>
+                    <div class="equipment-slot">
+                        <span class="slot-name">饰品</span>
+                        <span class="slot-value" id="equip-accessory">无</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 咒语面板 -->
+        <div id="spells-panel" class="panel hidden">
+            <div class="panel-header">
+                <h2>咒语</h2>
+                <button type="button" class="close-btn" data-panel="spells-panel">×</button>
+            </div>
+            <div class="panel-content">
+                <div id="spells-list" class="spells-grid">
+                    <!-- 咒语将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务面板 -->
+        <div id="quests-panel" class="panel hidden">
+            <div class="panel-header">
+                <h2>任务</h2>
+                <button type="button" class="close-btn" data-panel="quests-panel">×</button>
+            </div>
+            <div class="panel-content">
+                <div class="quest-section">
+                    <h3>主线任务</h3>
+                    <div id="main-quests" class="quest-list">
+                        <!-- 主线任务将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+                <div class="quest-section">
+                    <h3>支线任务</h3>
+                    <div id="side-quests" class="quest-list">
+                        <!-- 支线任务将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+                <div class="quest-section">
+                    <h3>每日任务</h3>
+                    <div id="daily-quests" class="quest-list">
+                        <!-- 每日任务将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 战斗面板 -->
+        <div id="combat-panel" class="panel hidden">
+            <div class="panel-content">
+                <div class="enemy-info">
+                    <div class="enemy-name" id="enemy-name">魔兽</div>
+                    <div class="enemy-level">Lv.<span id="enemy-level">2</span></div>
+                </div>
+                <div class="enemy-health-bar">
+                    <div id="enemy-health-bar" class="bar-fill"></div>
+                    <span id="enemy-health-value">80/80</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 对话框 -->
+        <div id="dialogue-box" class="panel hidden">
+            <div class="panel-content">
+                <div class="dialogue-speaker" id="dialogue-speaker">NPC</div>
+                <div class="dialogue-text" id="dialogue-text">对话内容</div>
+                <div class="dialogue-options" id="dialogue-options">
+                    <!-- 对话选项将通过JavaScript动态添加 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏结束界面 -->
+        <div id="game-over-screen" class="screen-overlay hidden">
+            <div class="screen-content">
+                <h1 id="game-over-title">游戏结束</h1>
+                <p id="game-over-message">挑战失败</p>
+                <button type="button" id="restart-btn">重新开始</button>
+            </div>
+        </div>
+    </div>
+           <!-- three.js 模块 -->
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "/game/three.js-r181/build/three.module.js",
+                    "three/addons/": "/game/three.js-r181/examples/jsm/"
+                }
+            }
+            </script>
+        <!-- JavaScript模块 -->
+        <script type="module">
+            // 动态导入main.js模块
+            import('./src/js/main.js').catch(error => {
+                console.warn('main.js加载失败', error);
+            });
+        </script>
+</body>
+
+</html>
