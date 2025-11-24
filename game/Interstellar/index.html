@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 <html>
+  <!-- three.js 模块 -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "/game/three.js-r181/build/three.module.js",
+                "three/addons/": "/game/three.js-r181/examples/jsm/"
+            }
+        }
+    </script>
 <head>
   <meta charset="utf-8">
   <title>宇宙探索者</title>
@@ -13,6 +22,7 @@
     #quest-log { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.5); padding: 10px; width: 300px; }
     #tech-tree { position: absolute; top: 20px; left: 350px; background: rgba(0,0,0,0.5); padding: 10px; }
   </style>
+  
 </head>
 <body>
   <div id="game-container"></div>
