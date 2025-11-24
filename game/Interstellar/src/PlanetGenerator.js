@@ -156,4 +156,51 @@ export class PlanetGenerator {
     const base = radius / 10;
     const multipliers = { terran: 1, gasGiant: 2, ice: 0.8, volcanic: 1.2, desert: 0.9 };
     return base * multipliers[type];
+  }  createTerranMaterial(hasDetail) {
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x228b22,
+      roughness: 0.8,
+      metalness: 0.2
+    });
+    if (hasDetail) {
+      // 可以添加纹理细节
+    }
+    return material;
   }
+  
+  createGasGiantMaterial() {
+    return new THREE.MeshStandardMaterial({
+      color: 0xffa500,
+      transparent: true,
+      opacity: 0.8,
+      roughness: 1
+    });
+  }
+  
+  createIceMaterial(hasDetail) {
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x87ceeb,
+      roughness: 0.5,
+      metalness: 0.3,
+      emissive: 0x111133
+    });
+    return material;
+  }
+  
+  createVolcanicMaterial(hasDetail) {
+    return new THREE.MeshStandardMaterial({
+      color: 0x8b4513,
+      roughness: 0.9,
+      metalness: 0.4
+    });
+  }
+  
+  createDesertMaterial(hasDetail) {
+    return new THREE.MeshStandardMaterial({
+      color: 0xe9c163,
+      roughness: 0.7,
+      metalness: 0.1
+    });
+  }
+}
+
