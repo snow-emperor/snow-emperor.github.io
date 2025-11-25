@@ -1,37 +1,2191 @@
 <!DOCTYPE html>
-<html>
-  <!-- three.js 模块 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>宇宙探索模拟器 - 2242</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            overflow: hidden;
+            background: #000;
+            color: #fff;
+            touch-action: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* HUD面板样式 */
+        .hud-panel {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            border-radius: 8px;
+            padding: 10px;
+            transition: opacity 0.3s, transform 0.3s;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            z-index: 10;
+            border: 1px solid rgba(80, 80, 80, 0.5);
+        }
+
+        .hud-panel.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        #resources { bottom: 20px; left: 20px; width: 220px; }
+        #build-menu { top: 20px; right: 20px; width: 240px; }
+        #quest-log { top: 20px; left: 20px; width: 320px; max-height: 400px; overflow-y: auto; }
+        #tech-tree { top: 20px; left: 360px; width: 320px; max-height: 400px; overflow-y: auto; }
+        #planet-info { top: 20px; right: 280px; width: 220px; }
+        #hud-help { bottom: 20px; right: 20px; width: 280px; }
+        #status-panel { top: 20px; left: 700px; width: 220px; }
+
+        /* 按钮样式 */
+        .building-btn { 
+            background: rgba(50,50,50,0.8); 
+            border: 1px solid #666; 
+            padding: 8px; 
+            margin: 5px 0; 
+            cursor: pointer; 
+            border-radius: 3px;
+            transition: all 0.2s;
+            color: white;
+            text-align: left;
+            width: 100%;
+        }
+
+        .building-btn:hover { 
+            background: rgba(80,80,80,0.8); 
+            border-color: #888;
+        }
+
+        .building-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button { 
+            background: #444; 
+            color: white; 
+            border: none; 
+            padding: 5px 10px; 
+            margin: 3px 0; 
+            border-radius: 3px; 
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: #666; }
+
+        /* 任务和科技样式 */
+        .quest { 
+            margin: 8px 0; 
+            padding: 8px; 
+            border-left: 3px solid #444; 
+            background: rgba(50,50,50,0.3);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .quest.available { border-color: #4a9; }
+        .quest.active { border-color: #994; }
+        .quest.completed { 
+            border-color: #494;
+            opacity: 0.8;
+        }
+
+        .tech { 
+            margin: 10px 0; 
+            padding: 8px; 
+            border-bottom: 1px solid #444; 
+            position: relative;
+        }
+
+        .tech.upgradable { 
+            border-color: #494;
+            background: rgba(60, 140, 60, 0.1);
+        }
+
+        .tech-locked {
+            opacity: 0.5;
+        }
+
+        .tech-level {
+            position: absolute;
+            right: 10px;
+            top: 8px;
+            font-size: 0.8em;
+            color: #aaa;
+        }
+
+        /* 状态指标 */
+        .status-bar {
+            height: 8px;
+            background: rgba(80,80,80,0.5);
+            border-radius: 4px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+
+        .status-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .oxygen-fill { background: #4a9; }
+        .health-fill { background: #944; }
+        .temperature-fill { background: #994; }
+
+        /* 帮助面板 */
+        .help-toggle {
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+
+        .help-content {
+            display: none;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .keybind { 
+            display: inline-block; 
+            background: rgba(255,255,255,0.1); 
+            padding: 0 5px; 
+            border-radius: 3px; 
+            margin: 0 3px; 
+            font-family: monospace;
+        }
+
+        /* 移动端虚拟按键 */
+        .mobile-controls {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .joystick {
+            position: absolute;
+            left: 50px;
+            bottom: 0;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            pointer-events: auto;
+        }
+
+        .joystick-thumb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .action-buttons {
+            position: absolute;
+            right: 50px;
+            bottom: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            pointer-events: auto;
+        }
+
+        .action-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-collect { background: rgba(0, 255, 0, 0.3); }
+        .btn-attack { background: rgba(255, 0, 0, 0.3); }
+        .btn-menu { background: rgba(255, 255, 0, 0.3); }
+        .btn-help { background: rgba(0, 0, 255, 0.3); }
+
+        /* 通知样式 */
+        .notification {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            z-index: 30;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .notification.success {
+            border-color: #494;
+        }
+
+        .notification.warning {
+            border-color: #994;
+        }
+
+        .notification.error {
+            border-color: #944;
+        }
+
+        /* 模态窗口 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #fff;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        /* 存档/读档菜单 */
+        .save-slot {
+            padding: 10px;
+            background: #222;
+            margin: 8px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .save-slot:hover {
+            background: #333;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 1200px) {
+            #tech-tree {
+                top: 440px;
+                left: 20px;
+            }
+            #status-panel {
+                top: 440px;
+                left: 360px;
+            }
+        }
+
+        @media (orientation: landscape) and (max-width: 1024px) {
+            .mobile-controls { display: block; }
+            #tech-tree, #status-panel {
+                top: auto;
+                bottom: 150px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hud-panel {
+                max-width: 45%;
+                font-size: 0.9em;
+            }
+            #quest-log, #tech-tree {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <!-- HUD面板 -->
+    <div id="resources" class="hud-panel"><h3>资源 (按I键切换)</h3></div>
+    <div id="build-menu" class="hud-panel"><h3>建造菜单 (按B键切换)</h3></div>
+    <div id="quest-log" class="hud-panel"><h3>任务日志 (按Q键切换)</h3></div>
+    <div id="tech-tree" class="hud-panel"><h3>科技树 (按T键切换)</h3></div>
+    <div id="planet-info" class="hud-panel"><h3>星球信息</h3></div>
+    <div id="hud-help" class="hud-panel visible">
+        <div class="help-toggle">
+            <span>帮助</span>
+            <span id="help-icon">▼</span>
+        </div>
+        <div class="help-content" id="help-content">
+            <div>移动: <span class="keybind">W</span><span class="keybind">A</span><span class="keybind">S</span><span class="keybind">D</span>/摇杆</div>
+            <div>跳跃/上升: <span class="keybind">空格</span></div>
+            <div>下降: <span class="keybind">左Shift</span></div>
+            <div>收集资源: <span class="keybind">E</span>/拾取键</div>
+            <div>资源面板: <span class="keybind">I</span></div>
+            <div>建造菜单: <span class="keybind">B</span></div>
+            <div>任务日志: <span class="keybind">Q</span></div>
+            <div>科技树: <span class="keybind">T</span></div>
+            <div>星球信息: <span class="keybind">P</span></div>
+            <div>状态面板: <span class="keybind">F</span></div>
+            <div>菜单: <span class="keybind">ESC</span></div>
+            <div>存档: <span class="keybind">F5</span></div>
+            <div>读档: <span class="keybind">F9</span></div>
+        </div>
+    </div>
+    <div id="status-panel" class="hud-panel"><h3>生存状态</h3></div>
+
+    <!-- 移动端虚拟按键 -->
+    <div class="mobile-controls">
+        <div class="joystick">
+            <div class="joystick-thumb"></div>
+        </div>
+        <div class="action-buttons">
+            <div class="action-btn btn-collect" data-action="collect">拾取</div>
+            <div class="action-btn btn-attack" data-action="attack">攻击</div>
+            <div class="action-btn btn-menu" data-action="menu">菜单</div>
+            <div class="action-btn btn-help" data-action="help">帮助</div>
+        </div>
+    </div>
+
+    <!-- 通知组件 -->
+    <div class="notification" id="notification"></div>
+
+    <!-- 菜单模态框 -->
+    <div class="modal" id="menu-modal">
+        <div class="modal-content">
+            <div class="modal-title">游戏菜单</div>
+            <button id="new-game">新游戏</button>
+            <button id="save-game">保存游戏</button>
+            <button id="load-game">加载游戏</button>
+            <button id="options">选项</button>
+            <button id="close-menu">关闭</button>
+        </div>
+    </div>
+
+    <!-- 存档模态框 -->
+    <div class="modal" id="save-modal">
+        <div class="modal-content">
+            <div class="modal-title">保存游戏</div>
+            <input type="text" id="save-name" placeholder="输入存档名称">
+            <button id="do-save">保存</button>
+            <button id="cancel-save">取消</button>
+        </div>
+    </div>
+
+    <!-- 读档模态框 -->
+    <div class="modal" id="load-modal">
+        <div class="modal-content">
+            <div class="modal-title">加载游戏</div>
+            <div id="save-slots"></div>
+            <button id="cancel-load">取消</button>
+        </div>
+    </div>
+
     <script type="importmap">
         {
             "imports": {
-                "three": "/game/three.js-r181/build/three.module.js",
-                "three/addons/": "/game/three.js-r181/examples/jsm/"
+                "three": "https://cdn.jsdelivr.net/npm/three@0.181.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.181.0/examples/jsm/"
             }
         }
     </script>
-<head>
-  <meta charset="utf-8">
-  <title>宇宙探索者</title>
-  <style>
-    body { margin: 0; overflow: hidden; }
-    #game-container { position: relative; width: 100vw; height: 100vh; }
-    #hud { position: absolute; bottom: 20px; left: 20px; color: white; }
-    #resources { background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; }
-    #build-menu { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.5); padding: 10px; }
-    .building-btn { padding: 5px 10px; margin: 5px; cursor: pointer; }
-    #quest-log { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.5); padding: 10px; width: 300px; }
-    #tech-tree { position: absolute; top: 20px; left: 350px; background: rgba(0,0,0,0.5); padding: 10px; }
-  </style>
-  
-</head>
-<body>
-  <div id="game-container"></div>
-  <div id="hud">
-    <div id="resources"></div>
-  </div>
-  <div id="build-menu"></div>
-  <div id="quest-log"></div>
-  <div id="tech-tree"></div>
-  <script type="module" src="main.js"></script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { WebGPURenderer } from 'three/addons/renderers/WebGPURenderer.js';
+        import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
+
+                // 全局键盘状态
+        window.keyboardState = {};
+        const uiPanels = {
+            'KeyI': 'resources',
+            'KeyB': 'build-menu',
+            'KeyQ': 'quest-log',
+            'KeyT': 'tech-tree',
+            'KeyP': 'planet-info',
+            'KeyF': 'status-panel'
+        };
+        let lastKeyPress = {};
+
+        // 键盘事件处理
+        window.addEventListener('keydown', (e) => {
+            window.keyboardState[e.code] = true;
+            
+            // 面板显示/隐藏切换
+            if (uiPanels[e.code] && (!lastKeyPress[e.code] || Date.now() - lastKeyPress[e.code] > 100)) {
+                lastKeyPress[e.code] = Date.now();
+                const panel = document.getElementById(uiPanels[e.code]);
+                panel.classList.toggle('visible');
+            }
+            
+            // ESC显示菜单
+            if (e.code === 'Escape') {
+                document.getElementById('menu-modal').classList.toggle('visible');
+            }
+            
+            // 存档快捷键
+            if (e.code === 'F5') {
+                e.preventDefault();
+                document.getElementById('save-modal').classList.add('visible');
+            }
+            
+            // 读档快捷键
+            if (e.code === 'F9') {
+                e.preventDefault();
+                loadGameSlots();
+                document.getElementById('load-modal').classList.add('visible');
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            window.keyboardState[e.code] = false;
+        });
+
+        // 模态框控制
+        document.getElementById('close-menu').addEventListener('click', () => {
+            document.getElementById('menu-modal').classList.remove('visible');
+        });
+
+        document.getElementById('save-game').addEventListener('click', () => {
+            document.getElementById('menu-modal').classList.remove('visible');
+            document.getElementById('save-modal').classList.add('visible');
+        });
+
+        document.getElementById('load-game').addEventListener('click', () => {
+            document.getElementById('menu-modal').classList.remove('visible');
+            loadGameSlots();
+            document.getElementById('load-modal').classList.add('visible');
+        });
+
+        document.getElementById('cancel-save').addEventListener('click', () => {
+            document.getElementById('save-modal').classList.remove('visible');
+        });
+
+        document.getElementById('cancel-load').addEventListener('click', () => {
+            document.getElementById('load-modal').classList.remove('visible');
+        });
+
+        // 帮助面板交互
+        document.querySelector('.help-toggle').addEventListener('click', () => {
+            const content = document.getElementById('help-content');
+            const icon = document.getElementById('help-icon');
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                icon.textContent = '▼';
+            } else {
+                content.style.display = 'block';
+                icon.textContent = '▲';
+            }
+        });
+
+        // 场景管理器 (WebGPU优先)
+        class SceneManager {
+            constructor() {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+                this.renderer = null;
+                this.controls = null;
+                this.stars = null;
+                this.planets = [];
+                this.ground = null;
+                this.skybox = null;
+            }
+
+            async init() {
+                // 优先尝试WebGPU渲染器
+                try {
+                    this.renderer = new WebGPURenderer({ antialias: true });
+                    console.log('WebGPU渲染器初始化成功');
+                } catch (e) {
+                    console.warn('WebGPU初始化失败，使用WebGL渲染器:', e);
+                    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                }
+
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.shadowMap.enabled = true;
+                document.getElementById('game-container').appendChild(this.renderer.domElement);
+                
+                this.camera.position.set(0, 2, 5);
+                
+                // 第一人称控制器
+                this.controls = new FirstPersonControls(this.camera, this.renderer.domElement);
+                this.controls.movementSpeed = 5;
+                this.controls.lookSpeed = 0.05;
+                this.controls.lookVertical = true;
+                
+                // 光源设置
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                this.scene.add(ambientLight);
+                
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(100, 100, 100);
+                directionalLight.castShadow = true;
+                this.scene.add(directionalLight);
+                
+                // 阴影设置
+                directionalLight.shadow.mapSize.width = 2048;
+                directionalLight.shadow.mapSize.height = 2048;
+                directionalLight.shadow.camera.near = 0.5;
+                directionalLight.shadow.camera.far = 500;
+                
+                this.createStars();
+                this.createSkybox();
+                window.addEventListener('resize', () => this.onWindowResize());
+            }
+
+            createStars() {
+                const geometry = new THREE.BufferGeometry();
+                const count = 10000;
+                const positions = new Float32Array(count * 3);
+                const colors = new Float32Array(count * 3);
+                
+                for (let i = 0; i < count; i++) {
+                    const i3 = i * 3;
+                    positions[i3] = (Math.random() - 0.5) * 2000;
+                    positions[i3 + 1] = (Math.random() - 0.5) * 2000;
+                    positions[i3 + 2] = (Math.random() - 0.5) * 2000;
+                    
+                    // 随机星色
+                    const color = new THREE.Color().setHSL(Math.random() * 0.1, 0.5, 0.5 + Math.random() * 0.5);
+                    colors[i3] = color.r;
+                    colors[i3 + 1] = color.g;
+                    colors[i3 + 2] = color.b;
+                }
+                
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                const material = new THREE.PointsMaterial({ 
+                    size: 1, 
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                this.stars = new THREE.Points(geometry, material);
+                this.scene.add(this.stars);
+            }
+
+            createSkybox() {
+                const skyboxGeometry = new THREE.BoxGeometry(10000, 10000, 10000);
+                const skyboxMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x050520,
+                    side: THREE.BackSide
+                });
+                this.skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
+                this.scene.add(this.skybox);
+            }
+
+            createGround(size = 1000, segments = 100) {
+                const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
+                const material = new THREE.MeshStandardMaterial({
+                    color: 0x8b4513,
+                    wireframe: false
+                });
+                
+                // 应用高度图
+                const vertices = geometry.attributes.position.array;
+                const noise = new SimplexNoise();
+                
+                for (let i = 0; i < vertices.length; i += 3) {
+                    const x = vertices[i] / size;
+                    const z = vertices[i + 2] / size;
+                    vertices[i + 1] = noise.noise2d(x * 5, z * 5) * 5;
+                }
+                
+                geometry.computeVertexNormals();
+                this.ground = new THREE.Mesh(geometry, material);
+                this.ground.rotation.x = -Math.PI / 2;
+                this.ground.receiveShadow = true;
+                this.scene.add(this.ground);
+                return this.ground;
+            }
+
+            addPlanet(planet) {
+                this.planets.push(planet);
+                this.scene.add(planet.mesh);
+            }
+
+            onWindowResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            addToScene(object) {
+                this.scene.add(object);
+            }
+
+            removeFromScene(object) {
+                this.scene.remove(object);
+            }
+
+            async update(delta) {
+                this.controls.update(delta);
+                // 行星自转
+                this.planets.forEach(planet => {
+                    planet.mesh.rotation.y += 0.001 * delta;
+                });
+                await this.renderer.renderAsync(this.scene, this.camera);
+            }
+        }
+
+        // 星球生成器
+        class PlanetGenerator {
+            constructor(game) {
+                this.game = game;
+                this.noise = new SimplexNoise();
+            }
+
+            generatePlanet(type, distance, angle) {
+                const radius = this.getRadiusByType(type);
+                const mesh = this.createPlanetMesh(type, radius);
+                
+                mesh.position.x = Math.cos(angle) * distance;
+                mesh.position.z = Math.sin(angle) * distance;
+                
+                // 生成特定星球的环境参数
+                const planetEnv = this.generateEnvironment(type);
+                
+                const planet = {
+                    id: `planet_${Date.now()}`,
+                    type,
+                    radius,
+                    mesh,
+                    position: mesh.position.clone(),
+                    resources: this.generateResources(type),
+                    terrainType: this.getTerrainType(type),
+                    atmosphere: this.hasAtmosphere(type),
+                    gravity: this.calculateGravity(radius, type),
+                    environment: planetEnv,
+                    aliens: this.generateAliens(type),
+                    structures: [] // 前文明遗迹
+                };
+                
+                // 为赤岩星添加初始任务相关的资源
+                if (type === 'desert' && distance < 200) {
+                    planet.resources.set('赤岩果', 50);
+                    planet.resources.set('玄武岩', 200);
+                    planet.resources.set('硅基植物茎', 100);
+                    planet.structures.push({
+                        type: 'ancient_ruin',
+                        position: new THREE.Vector3(100, 0, 150),
+                        discovered: false
+                    });
+                }
+                
+                return planet;
+            }
+
+            createPlanetMesh(type, radius) {
+                const lod = new THREE.LOD();
+                
+                const highDetailGeo = this.createPlanetGeometry(radius, 128);
+                const highDetailMat = this.getMaterialByType(type, true);
+                lod.addLevel(new THREE.Mesh(highDetailGeo, highDetailMat), 500);
+                
+                const midDetailGeo = this.createPlanetGeometry(radius, 64);
+                const midDetailMat = this.getMaterialByType(type, false);
+                lod.addLevel(new THREE.Mesh(midDetailGeo, midDetailMat), 1500);
+                
+                const lowDetailGeo = this.createPlanetGeometry(radius, 32);
+                const lowDetailMat = this.getMaterialByType(type, false);
+                lod.addLevel(new THREE.Mesh(lowDetailGeo, lowDetailMat), 3000);
+                
+                lod.name = `planet_${type}`;
+                lod.castShadow = true;
+                return lod;
+            }
+
+            createPlanetGeometry(radius, segments) {
+                const geometry = new THREE.SphereGeometry(radius, segments, segments);
+                const vertices = geometry.attributes.position.array;
+                
+                for (let i = 0; i < vertices.length; i += 3) {
+                    const x = vertices[i] / radius;
+                    const y = vertices[i + 1] / radius;
+                    const z = vertices[i + 2] / radius;
+                    
+                    const noiseValue = this.noise.noise3d(x * 4, y * 4, z * 4) * 0.2;
+                    const height = radius * (1 + noiseValue);
+                    vertices[i] = x * height;
+                    vertices[i + 1] = y * height;
+                    vertices[i + 2] = z * height;
+                }
+                
+                geometry.computeVertexNormals();
+                return geometry;
+            }
+
+            getRadiusByType(type) {
+                switch (type) {
+                    case 'terran': return 10 + Math.random() * 5;
+                    case 'gas': return 30 + Math.random() * 10;
+                    case 'ice': return 15 + Math.random() * 7;
+                    case 'desert': return 8 + Math.random() * 4; // 赤岩星属于沙漠类型
+                    default: return 12 + Math.random() * 6;
+                }
+            }
+
+            getMaterialByType(type, highDetail) {
+                const material = new THREE.MeshStandardMaterial();
+                switch (type) {
+                    case 'terran':
+                        material.color.set(0x228b22);
+                        material.roughness = highDetail ? 0.6 : 0.8;
+                        material.metalness = 0.1;
+                        if (highDetail) material.normalMap = this.createNormalMap('terran');
+                        break;
+                    case 'gas':
+                        material.color.set(0x87ceeb);
+                        material.transparent = true;
+                        material.opacity = 0.8;
+                        material.roughness = 0.3;
+                        material.metalness = 0.2;
+                        break;
+                    case 'ice':
+                        material.color.set(0xe0ffff);
+                        material.roughness = highDetail ? 0.4 : 0.6;
+                        material.metalness = 0.3;
+                        if (highDetail) material.emissive.set(0x1e90ff);
+                        break;
+                    case 'desert': // 赤岩星材质
+                        material.color.set(0xcd5c5c);
+                        material.roughness = 0.7;
+                        material.metalness = 0.2;
+                        if (highDetail) material.displacementMap = this.createDisplacementMap('desert');
+                        break;
+                }
+                return material;
+            }
+
+            generateResources(type) {
+                const resources = new Map();
+                switch (type) {
+                    case 'terran':
+                        resources.set('水', Math.floor(Math.random() * 1000));
+                        resources.set('木材', Math.floor(Math.random() * 800));
+                        resources.set('铁矿', Math.floor(Math.random() * 600));
+                        break;
+                    case 'gas':
+                        resources.set('氢气', Math.floor(Math.random() * 5000));
+                        resources.set('氦气', Math.floor(Math.random() * 3000));
+                        break;
+                    case 'ice':
+                        resources.set('冰', Math.floor(Math.random() * 2000));
+                        resources.set('甲烷', Math.floor(Math.random() * 1500));
+                        break;
+                    case 'desert': // 赤岩星资源
+                        resources.set('赤铁矿', Math.floor(Math.random() * 800));
+                        resources.set('硅晶', Math.floor(Math.random() * 600));
+                        resources.set('可燃苔藓', Math.floor(Math.random() * 400));
+                        break;
+                }
+                return resources;
+            }
+
+            generateEnvironment(type) {
+                // 生成星球环境参数
+                switch (type) {
+                    case 'desert': // 赤岩星环境参数
+                        return {
+                            temperature: {
+                                day: 45, // 白天气温45℃
+                                night: -10, // 夜间气温-10℃
+                                current: 45
+                            },
+                            atmosphere: {
+                                oxygen: 18, // 氧气浓度18%
+                                toxic: 3, // 有毒气体3%
+                                radiation: 5
+                            },
+                            weather: {
+                                current: 'clear',
+                                events: ['sandstorm']
+                            },
+                            geology: {
+                                plateActivity: 3,
+                                volcanoActivity: 2
+                            }
+                    case 'terran':
+                        return {
+                            temperature: {
+                                day: 22,
+                                night: 10,
+                                current: 22
+                            },
+                            atmosphere: {
+                                oxygen: 21,
+                                toxic: 0,
+                                radiation: 1
+                            },
+                            weather: {
+                                current: 'clear',
+                                events: ['rain', 'storm']
+                            },
+                            geology: {
+                                plateActivity: 5,
+                                volcanoActivity: 3
+                            }
+                    default:
+                        return {
+                            temperature: {
+                                day: 10,
+                                night: -5,
+                                current: 10
+                            },
+                            atmosphere: {
+                                oxygen: 15,
+                                toxic: 1,
+                                radiation: 2
+                            },
+                            weather: {
+                                current: 'clear',
+                                events: []
+                            },
+                            geology: {
+                                plateActivity: 2,
+                                volcanoActivity: 1
+                            }
+                }
+            }
+
+            getTerrainType(type) {
+                const terrains = {
+                    terran: ['ocean', 'forest', 'mountain'],
+                    gas: ['cloud', 'storm'],
+                    ice: ['glacier', 'frozen_lake'],
+                    desert: ['dune', 'rocky', 'canyon'] // 赤岩星地形
+                };
+                return terrains[type] || ['plain'];
+            }
+
+            hasAtmosphere(type) {
+                return !['desert', 'terran'].includes(type) || Math.random() > 0.3;
+            }
+
+            calculateGravity(radius, type) {
+                const baseGravity = radius / 10;
+                return type === 'gas' ? baseGravity * 0.5 : type === 'ice' ? baseGravity * 0.8 : baseGravity;
+            }
+
+            generateAliens(type) {
+                // 根据星球类型生成原生生物
+                const aliens = [];
+                switch (type) {
+                    case 'desert':
+                        // 赤岩星生物
+                        aliens.push({
+                            type: 'silicon_worm', // 硅基蠕虫
+                            count: Math.floor(Math.random() * 5) + 2,
+                            aggression: 2,
+                            resource: 'silicon_oil'
+                        });
+                        aliens.push({
+                            type: 'electro_bird', // 电磁飞鸟
+                            count: Math.floor(Math.random() * 8) + 3,
+                            aggression: 3,
+                            resource: 'superconductor_feather'
+                        });
+                        break;
+                    case 'terran':
+                        aliens.push({
+                            type: 'herbivore',
+                            count: Math.floor(Math.random() * 10) + 5,
+                            aggression: 1,
+                            resource: 'meat'
+                        });
+                        aliens.push({
+                            type: 'predator',
+                            count: Math.floor(Math.random() * 3) + 1,
+                            aggression: 4,
+                            resource: 'fur'
+                        });
+                        break;
+                }
+                return aliens;
+            }
+
+            createNormalMap(type) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d');
+                const imgData = ctx.createImageData(512, 512);
+                for (let i = 0; i < imgData.data.length; i += 4) {
+                    const value = Math.random() * 255;
+                    imgData.data[i] = value;
+                    imgData.data[i + 1] = value;
+                    imgData.data[i + 2] = 255;
+                    imgData.data[i + 3] = 255;
+                }
+                ctx.putImageData(imgData, 0, 0);
+                const texture = new THREE.CanvasTexture(canvas);
+                return texture;
+            }
+
+            createDisplacementMap(type) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d');
+                const imgData = ctx.createImageData(512, 512);
+                
+                for (let y = 0; y < 512; y++) {
+                    for (let x = 0; x < 512; x++) {
+                        const index = (y * 512 + x) * 4;
+                        const value = Math.floor(this.noise.noise2d(x / 100, y / 100) * 128 + 128);
+                        imgData.data[index] = value;
+                        imgData.data[index + 1] = value;
+                        imgData.data[index + 2] = value;
+                        imgData.data[index + 3] = 255;
+                    }
+                }
+                
+                ctx.putImageData(imgData, 0, 0);
+                const texture = new THREE.CanvasTexture(canvas);
+                return texture;
+            }
+        }
+
+        // 玩家类
+        class Player {
+            constructor() {
+                this.mesh = null;
+                this.inventory = new Map();
+                this.health = 100;
+                this.oxygen = 100;
+                this.temperature = 37; // 人体正常体温
+                this.suitIntegrity = 100; // 宇航服完整性
+                this.cloneCount = 3; // 初始3个克隆体
+                this.position = new THREE.Vector3(0, 0, 0);
+                this.velocity = new THREE.Vector3(0, 0, 0);
+                this.onGround = false;
+                this.moveSpeed = 5;
+                this.jumpStrength = 8;
+                this.gravity = 0.2;
+            }
+
+            init() {
+                const playerGeometry = new THREE.CapsuleGeometry(0.5, 1.5, 16);
+                const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x4a6fa5 });
+                this.mesh = new THREE.Mesh(playerGeometry, playerMaterial);
+                this.mesh.position.set(0, 2, 0);
+                this.mesh.castShadow = true;
+                
+                // 添加手电筒
+                const flashlight = new THREE.PointLight(0xffffff, 2, 10);
+                flashlight.position.set(0, 0, -1);
+                this.mesh.add(flashlight);
+                
+                return this.mesh;
+            }
+
+            addToInventory(item, amount) {
+                const current = this.inventory.get(item) || 0;
+                this.inventory.set(item, current + amount);
+                
+                // 限制堆叠上限为999
+                if (this.inventory.get(item) > 999) {
+                    this.inventory.set(item, 999);
+                }
+            }
+
+            removeFromInventory(item, amount) {
+                const current = this.inventory.get(item) || 0;
+                if (current >= amount) {
+                    this.inventory.set(item, current - amount);
+                    return true;
+                }
+                return false;
+            }
+
+            hasEnough(item, amount) {
+                return (this.inventory.get(item) || 0) >= amount;
+            }
+
+            update(delta, currentPlanet) {
+                // 应用重力
+                if (!this.onGround) {
+                    this.velocity.y -= this.gravity * (currentPlanet?.gravity || 1);
+                }
+                
+                // 更新位置
+                this.mesh.position.add(this.velocity.clone().multiplyScalar(delta));
+                
+                // 环境影响
+                if (currentPlanet) {
+                    this.updateEnvironmentEffects(currentPlanet, delta);
+                }
+                
+                // 状态自然恢复/消耗
+                this.oxygen = Math.max(0, this.oxygen - 0.01 * delta);
+                
+                // 检查死亡
+                if (this.health <= 0) {
+                    return this.respawn();
+                }
+                
+                return true;
+            }
+
+            updateEnvironmentEffects(planet, delta) {
+                // 温度影响
+                const envTemp = planet.environment.temperature.current;
+                const tempDiff = Math.abs(envTemp - 20); // 20℃为理想温度
+                
+                if (envTemp > 35) {
+                    // 高温
+                    this.temperature += 0.02 * delta;
+                    this.suitIntegrity -= 0.01 * delta;
+                } else if (envTemp < 0) {
+                    // 低温
+                    this.temperature -= 0.02 * delta;
+                    this.suitIntegrity -= 0.01 * delta;
+                }
+                
+                // 氧气影响
+                if (planet.environment.atmosphere.oxygen < 15) {
+                    this.oxygen -= 0.03 * delta;
+                }
+                
+                // 有毒气体影响
+                if (planet.environment.atmosphere.toxic > 0) {
+                    this.health -= 0.01 * planet.environment.atmosphere.toxic * delta;
+                }
+                
+                // 辐射影响
+                if (planet.environment.atmosphere.radiation > 0) {
+                    this.health -= 0.005 * planet.environment.atmosphere.radiation * delta;
+                    this.suitIntegrity -= 0.005 * planet.environment.atmosphere.radiation * delta;
+                }
+                
+                // 极端温度对健康的影响
+                if (this.temperature > 42 || this.temperature < 30) {
+                    this.health -= 0.02 * delta;
+                }
+                
+                // 宇航服损坏加剧环境影响
+                const suitEffectiveness = this.suitIntegrity / 100;
+                if (suitEffectiveness < 0.5) {
+                    this.oxygen -= 0.02 * (0.5 - suitEffectiveness) * delta;
+                    this.health -= 0.01 * (0.5 - suitEffectiveness) * delta;
+                }
+            }
+
+            respawn() {
+                if (this.cloneCount > 0) {
+                    this.cloneCount--;
+                    this.health = 100;
+                    this.oxygen = 100;
+                    this.temperature = 37;
+                    this.suitIntegrity = 80; // 克隆后宇航服完整性下降
+                    
+                    // 回到飞船位置
+                    this.mesh.position.set(0, 2, 0);
+                    
+                    return true; // 重生成功
+                } else {
+                    // 克隆体耗尽，游戏结束
+                    return false;
+                }
+            }
+        }
+
+        // 科技树类
+        class TechTree {
+            constructor() {
+                this.unlocked = new Set(['stone_tools', 'campfire', 'fiber_weaving']); // 1级初始科技
+                this.availableTechs = this.generateTechTree();
+            }
+
+            generateTechTree() {
+                return {
+                    // 1级科技
+                    stone_tools: {
+                        level: 1,
+                        name: '石制工具',
+                        description: '提高采集效率30%',
+                        requires: [],
+                        resources: {},
+                        effect: { gatherRate: 1.3 }
+                    },
+                    campfire: {
+                        level: 1,
+                        name: '篝火',
+                        description: '夜间温度提升8℃',
+                        requires: [],
+                        resources: { 'wood': 10, 'stone': 5 },
+                        effect: { temperatureBoost: 8 }
+                    },
+                    fiber_weaving: {
+                        level: 1,
+                        name: '纤维编织',
+                        description: '背包容量增加5格',
+                        requires: [],
+                        resources: { 'plant_fiber': 20 },
+                        effect: { inventorySize: 5 }
+                    },
+                    
+                    // 4级科技
+                    electron_microscope: {
+                        level: 4,
+                        name: '电子显微镜',
+                        description: '可以观测原子结构',
+                        requires: ['optical_microscope'],
+                        resources: { 'steel': 5, 'circuit': 2 },
+                        effect: { unlockAtomicObservation: true }
+                    },
+                    ion_separator: {
+                        level: 4,
+                        name: '离子分离器',
+                        description: '可以提取纯元素',
+                        requires: ['electrolysis'],
+                        resources: { 'copper': 10, 'steel': 3, 'energy_cell': 5 },
+                        effect: { unlockElementExtraction: true }
+                    },
+                    molecular_synthesizer: {
+                        level: 4,
+                        name: '分子合成仪',
+                        description: '可以按公式合成物质',
+                        requires: ['chemical_reactor'],
+                        resources: { 'titanium': 5, 'circuit': 3, 'energy_cell': 10 },
+                        effect: { unlockMolecularSynthesis: true }
+                    },
+                    
+                    // 7级科技
+                    antimatter_engine: {
+                        level: 7,
+                        name: '反物质引擎',
+                        description: '实现星际航行',
+                        requires: ['fusion_reactor', 'advanced_materials'],
+                        resources: { 'antimatter': 1, 'titanium_alloy': 50, 'superconductor': 20 },
+                        effect: { interstellarTravel: true }
+                    },
+                    quantum_communication: {
+                        level: 7,
+                        name: '量子通讯',
+                        description: '实现跨光年实时通讯',
+                        requires: ['quantum_physics', 'advanced_computing'],
+                        resources: { 'quantum_chip': 3, 'superconductor': 10, 'platinum': 5 },
+                        effect: { quantumCommunication: true }
+                    },
+                    outpost_defense: {
+                        level: 7,
+                        name: '前哨站自动防御系统',
+                        description: '自动防御外来威胁',
+                        requires: ['automation', 'energy_shield'],
+                        resources: { 'steel_alloy': 100, 'laser_emitter': 5, 'ai_core': 1 },
+                        effect: { autoDefense: true }
+                    }
+                };
+            }
+
+            canUnlock(techName, player) {
+                const tech = this.availableTechs[techName];
+                if (!tech || this.unlocked.has(techName)) return false;
+                
+                // 检查前置科技
+                if (!tech.requires.every(req => this.unlocked.has(req))) return false;
+                
+                // 检查资源
+                return Object.entries(tech.resources).every(([res, amount]) => {
+                    return player.hasEnough(res, amount);
+                });
+            }
+
+            unlock(techName, player) {
+                if (!this.canUnlock(techName, player)) return false;
+                
+                const tech = this.availableTechs[techName];
+                
+                // 消耗资源
+                Object.entries(tech.resources).forEach(([res, amount]) => {
+                    player.removeFromInventory(res, amount);
+                });
+                
+                this.unlocked.add(techName);
+                return true;
+            }
+
+            getTechsByLevel(level) {
+                return Object.entries(this.availableTechs)
+                    .filter(([_, tech]) => tech.level === level)
+                    .map(([name, tech]) => ({ id: name, ...tech }));
+            }
+
+            updateTechPanel() {
+                const techPanel = document.getElementById('tech-tree');
+                let techHTML = '<h3>科技树 (按T键切换)</h3>';
+                
+                // 按等级分组显示
+                for (let level = 1; level <= 9; level++) {
+                    const techs = this.getTechsByLevel(level);
+                    if (techs.length === 0) continue;
+                    
+                    techHTML += `<h4>等级 ${level}</h4>`;
+                    techs.forEach(tech => {
+                        const isUnlocked = this.unlocked.has(tech.id);
+                        const isUpgradable = !isUnlocked && this.canUnlock(tech.id, game.player);
+                        
+                        techHTML += `
+                            <div class="tech ${isUnlocked ? 'unlocked' : isUpgradable ? 'upgradable' : 'tech-locked'}">
+                                <div class="tech-level">Lv${tech.level}</div>
+                                <strong>${tech.name}</strong>
+                                <div>${tech.description}</div>
+                                <div>需求: ${Object.entries(tech.resources).map(([r, a]) => `${r}: ${a}`).join(', ')}</div>
+                                ${isUpgradable ? `<button class="unlock-tech" data-tech="${tech.id}">解锁</button>` : ''}
+                            </div>
+                        `;
+                    });
+                }
+                
+                techPanel.innerHTML = techHTML;
+                
+                // 添加解锁按钮事件
+                document.querySelectorAll('.unlock-tech').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const techId = e.target.dataset.tech;
+                        if (this.unlock(techId, game.player)) {
+                            this.updateTechPanel();
+                            game.showNotification(`已解锁科技: ${this.availableTechs[techId].name}`, 'success');
+                        }
+                    });
+                });
+            }
+        }
+
+        // 游戏主类
+        class SpaceExplorationGame {
+            constructor() {
+                this.sceneManager = new SceneManager();
+                this.planetGenerator = new PlanetGenerator(this);
+                this.player = new Player();
+                this.planets = [];
+                this.currentPlanet = null;
+                this.time = {
+                    day: 0,
+                    hour: 12, // 初始时间中午
+                    minute: 0
+                };
+                this.gameObjects = []; // 场景中的可交互物体
+                this.techTree = new TechTree();
+                this.quests = [];
+                this.buildings = [];
+                this.isPaused = false;
+            }
+
+            async start() {
+                await this.sceneManager.init();
+                this.initPlayer();
+                this.generateInitialPlanets();
+                this.createGameWorld();
+                this.initQuests();
+                this.updateHUD();
+                this.techTree.updateTechPanel();
+                this.gameLoop();
+                
+                // 添加建筑按钮事件
+                this.initBuildMenu();
+            }
+
+            initPlayer() {
+                const playerMesh = this.player.init();
+                this.sceneManager.addToScene(playerMesh);
+            }
+
+            generateInitialPlanets() {
+                // 生成X-73星系的3颗类地行星和小行星带
+                const types = ['desert', 'terran', 'ice']; // 赤岩星作为第一个沙漠行星
+                types.forEach((type, i) => {
+                    const distance = 100 + i * 150;
+                    const angle = (i / types.length) * Math.PI * 2;
+                    const planet = this.planetGenerator.generatePlanet(type, distance, angle);
+                    this.planets.push(planet);
+                    this.sceneManager.addPlanet(planet);
+                    
+                    // 初始在赤岩星
+                    if (type === 'desert' && i === 0) {
+                        this.currentPlanet = planet;
+                    }
+                });
+            }
+
+            createGameWorld() {
+                // 创建赤岩星地表
+                const ground = this.sceneManager.createGround(2000);
+                this.gameObjects.push({
+                    type: 'ground',
+                    mesh: ground
+                });
+                
+                // 添加初始飞船残骸
+                const shipGeometry = new THREE.BoxGeometry(20, 8, 15);
+                const shipMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
+                const ship = new THREE.Mesh(shipGeometry, shipMaterial);
+                ship.position.set(0, 5, 0);
+                ship.rotation.y = 0.3;
+                ship.castShadow = true;
+                this.sceneManager.addToScene(ship);
+                
+                this.gameObjects.push({
+                    type: 'ship_wreck',
+                    mesh: ship,
+                    interactable: true,
+                    name: '星尘号残骸',
+                    description: '你的飞船残骸，还能找到一些有用的物资'
+                });
+                
+                // 添加初始资源点
+                this.spawnResources();
+            }
+
+            spawnResources() {
+                // 在赤岩星上生成初始资源
+                if (this.currentPlanet?.type === 'desert') {
+                    // 生成赤岩果
+                    for (let i = 0; i < 10; i++) {
+                        this.spawnResource('赤岩果', 
+                            new THREE.Vector3(
+                                Math.random() * 100 - 50, 
+                                1, 
+                                Math.random() * 100 - 50
+                            ), 
+                            3 + Math.floor(Math.random() * 5)
+                        );
+                    }
+                    
+                    // 生成玄武岩
+                    for (let i = 0; i < 15; i++) {
+                        this.spawnResource('玄武岩', 
+                            new THREE.Vector3(
+                                Math.random() * 100 - 50, 
+                                1, 
+                                Math.random() * 100 - 100
+                            ), 
+                            5 + Math.floor(Math.random() * 8)
+                        );
+                    }
+                    
+                    // 生成硅基植物
+                    for (let i = 0; i < 8; i++) {
+                        this.spawnResource('硅基植物茎', 
+                            new THREE.Vector3(
+                                Math.random() * 100 - 100, 
+                                1, 
+                                Math.random() * 100 - 50
+                            ), 
+                            2 + Math.floor(Math.random() * 4)
+                        );
+                    }
+                }
+            }
+
+            spawnResource(type, position, amount) {
+                const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+                let color = 0x888888;
+                
+                switch (type) {
+                    case '赤岩果': color = 0xff6666; break;
+                    case '玄武岩': color = 0x333333; break;
+                    case '硅基植物茎': color = 0x66cc66; break;
+                }
+                
+                const material = new THREE.MeshStandardMaterial({ color });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.copy(position);
+                mesh.castShadow = true;
+                this.sceneManager.addToScene(mesh);
+                
+                this.gameObjects.push({
+                    type: 'resource',
+                    resourceType: type,
+                    amount: amount,
+                    mesh: mesh,
+                    interactable: true,
+                    name: type,
+                    description: `可以收集的${type}，数量: ${amount}`
+                });
+            }
+
+            initQuests() {
+                // 0级: 绝境着陆任务
+                this.quests.push({
+                    id: 1,
+                    title: '紧急避难',
+                    description: '搭建一个临时防风棚以抵御夜间低温和沙暴',
+                    target: { type: 'build', name: 'wind_shelter', amount: 1 },
+                    completed: false,
+                    reward: { resources: { '食物': 10 }, tech: '' },
+                    level: 0
+                });
+                
+                this.quests.push({
+                    id: 2,
+                    title: '补充水分',
+                    description: '收集10个赤岩果以补充水分和能量',
+                    target: { type: 'collect', name: '赤岩果', amount: 10 },
+                    completed: false,
+                    reward: { resources: { '水': 5 }, tech: '' },
+                    level: 0
+                });
+                
+                // 1级: 工具革命任务
+                this.quests.push({
+                    id: 3,
+                    title: '石器时代',
+                    description: '制作石斧和石镐以提高资源采集效率',
+                    target: { type: 'build', name: 'stone_axe', amount: 1 },
+                    completed: false,
+                    reward: { resources: { '玄武岩': 20 }, tech: '' },
+                    level: 1
+                });
+            }
+
+            initBuildMenu() {
+                const buildMenu = document.getElementById('build-menu');
+                const buildings = [
+                    {
+                        id: 'wind_shelter',
+                        name: '防风棚',
+                        description: '抵御沙暴和低温，需要10块玄武岩和5根硅基植物茎',
+                        resources: { '玄武岩': 10, '硅基植物茎': 5 }
+                    },
+                    {
+                        id: 'stone_axe',
+                        name: '石斧',
+                        description: '提高砍树效率50%，需要5块玄武岩和3根植物茎',
+                        resources: { '玄武岩': 5, '硅基植物茎': 3 }
+                    },
+                    {
+                        id: 'stone_pickaxe',
+                        name: '石镐',
+                        description: '提高采矿效率40%，需要5块玄武岩和2根植物茎',
+                        resources: { '玄武岩': 5, '硅基植物茎': 2 }
+                    },
+                    {
+                        id: 'campfire',
+                        name: '篝火',
+                        description: '提高周围温度，需要5块玄武岩和3份可燃苔藓',
+                        resources: { '玄武岩': 5, '可燃苔藓': 3 }
+                    }
+                ];
+                
+                let menuHTML = '<h3>建造菜单 (按B键切换)</h3>';
+                buildings.forEach(building => {
+                    menuHTML += `
+                        <div class="building-item">
+                            <button class="building-btn" data-building="${building.id}" 
+                                ${!this.canBuild(building) ? 'disabled' : ''}>
+                                ${building.name}
+                            </button>
+                            <div class="building-desc">${building.description}</div>
+                            <div class="building-cost">
+                                所需: ${Object.entries(building.resources).map(([r, a]) => `${r}: ${a}`).join(', ')}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                buildMenu.innerHTML = menuHTML;
+                
+                // 添加建造按钮事件
+                document.querySelectorAll('.building-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const buildingId = e.target.dataset.building;
+                        this.buildStructure(buildingId);
+                    });
+                });
+            }
+
+            canBuild(building) {
+                return Object.entries(building.resources).every(([res, amount]) => {
+                    return this.player.hasEnough(res, amount);
+                });
+            }
+
+            buildStructure(buildingId) {
+                const buildings = {
+                    wind_shelter: {
+                        name: '防风棚',
+                        resources: { '玄武岩': 10, '硅基植物茎': 5 },
+                        model: () => {
+                            const geometry = new THREE.CylinderGeometry(3, 4, 2, 8);
+                            const material = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+                            return new THREE.Mesh(geometry, material);
+                        }
+                    },
+                    stone_axe: {
+                        name: '石斧',
+                        resources: { '玄武岩': 5, '硅基植物茎': 3 },
+                        isTool: true
+                    },
+                    stone_pickaxe: {
+                        name: '石镐',
+                        resources: { '玄武岩': 5, '硅基植物茎': 2 },
+                        isTool: true
+                    },
+                    campfire: {
+                        name: '篝火',
+                        resources: { '玄武岩': 5, '可燃苔藓': 3 },
+                        model: () => {
+                            const geometry = new THREE.CylinderGeometry(1, 1.5, 0.5, 6);
+                            const material = new THREE.MeshStandardMaterial({ color: 0x553311 });
+                            const campfire = new THREE.Mesh(geometry, material);
+                            
+                            // 添加火焰效果
+                            const fireLight = new THREE.PointLight(0xff6600, 2, 3);
+                            fireLight.position.set(0, 1, 0);
+                            campfire.add(fireLight);
+                            
+                            return campfire;
+                        }
+                    }
+                };
+                
+                const building = buildings[buildingId];
+                if (!building || !this.canBuild(building)) return;
+                
+                // 消耗资源
+                Object.entries(building.resources).forEach(([res, amount]) => {
+                    this.player.removeFromInventory(res, amount);
+                });
+                
+                if (building.isTool) {
+                    // 工具添加到 inventory
+                    this.player.addToInventory(building.name, 1);
+                    this.showNotification(`已制作: ${building.name}`, 'success');
+                } else {
+                    // 建筑放置在玩家位置附近
+                    const structure = building.model();
+                    structure.position.copy(this.player.mesh.position);
+                    structure.position.x += 3;
+                    structure.position.y = 0.5;
+                    this.sceneManager.addToScene(structure);
+                    
+                    this.buildings.push({
+                        id: buildingId,
+                        type: buildingId,
+                        mesh: structure,
+                        position: structure.position.clone()
+                    });
+                    
+                    this.showNotification(`已建造: ${building.name}`, 'success');
+                }
+                
+                // 检查任务完成
+                this.checkQuestProgress();
+                this.updateHUD();
+            }
+
+            async gameLoop() {
+                if (this.isPaused) {
+                    requestAnimationFrame(() => this.gameLoop());
+                    return;
+                }
+                
+                const delta = 0.016; // 约60fps
+                this.updateGameTime(delta);
+                this.updatePlanetEnvironment();
+                this.handlePlayerMovement(delta);
+                this.checkCollisions();
+                this.checkInteractions();
+                await this.sceneManager.update(delta);
+                
+                // 更新玩家状态
+                const isAlive = this.player.update(delta, this.currentPlanet);
+                if (!isAlive) {
+                    this.gameOver();
+                    return;
+                }
+                
+                this.updateHUD();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+
+            updateGameTime(delta) {
+                // 游戏内时间流逝 (1小时 = 现实1分钟)
+                this.time.minute += delta * (60 / 60); // 每分钟游戏时间对应1秒现实时间
+                
+                if (this.time.minute >= 60) {
+                    this.time.hour++;
+                    this.time.minute = 0;
+                    
+                    if (this.time.hour >= 24) {
+                        this.time.day++;
+                        this.time.hour = 0;
+                    }
+                }
+            }
+
+            updatePlanetEnvironment() {
+                if (!this.currentPlanet) return;
+                
+                // 根据时间更新温度
+                const isNight = this.time.hour < 6 || this.time.hour >= 18;
+                const baseTemp = isNight 
+                    ? this.currentPlanet.environment.temperature.night 
+                    : this.currentPlanet.environment.temperature.day;
+                
+                // 平滑过渡温度
+                const tempDiff = baseTemp - this.currentPlanet.environment.temperature.current;
+                this.currentPlanet.environment.temperature.current += tempDiff * 0.01;
+                
+                // 随机天气事件 (赤岩星沙暴)
+                if (this.currentPlanet.type === 'desert' && Math.random() < 0.0001) {
+                    this.triggerWeatherEvent('sandstorm');
+                }
+            }
+
+            triggerWeatherEvent(eventType) {
+                if (!this.currentPlanet) return;
+                
+                this.currentPlanet.environment.weather.current = eventType;
+                let message = '';
+                
+                switch (eventType) {
+                    case 'sandstorm':
+                        message = '沙暴正在逼近！请尽快进入防风棚躲避！';
+                        // 沙暴期间的环境变化
+                        setTimeout(() => {
+                            this.showNotification(message, 'warning');
+                            
+                            // 沙暴持续2小时游戏时间
+                            setTimeout(() => {
+                                this.currentPlanet.environment.weather.current = 'clear';
+                                this.showNotification('沙暴结束了', 'info');
+                            }, 120000); // 2分钟现实时间
+                        }, Math.random() * 30000); // 0-30秒后发生
+                        break;
+                }
+            }
+
+            handlePlayerMovement(delta) {
+                const moveSpeed = this.player.moveSpeed;
+                const actualSpeed = moveSpeed * delta * 60; // 基于帧率的速度调整
+                
+                // 键盘控制
+                if (window.keyboardState['KeyW']) {
+                    this.sceneManager.controls.moveForward(actualSpeed);
+                }
+                if (window.keyboardState['KeyS']) {
+                    this.sceneManager.controls.moveForward(-actualSpeed);
+                }
+                if (window.keyboardState['KeyA']) {
+                    this.sceneManager.controls.moveRight(-actualSpeed);
+                }
+                if (window.keyboardState['KeyD']) {
+                    this.sceneManager.controls.moveRight(actualSpeed);
+                }
+                
+                // 跳跃
+                if (window.keyboardState['Space'] && this.player.onGround) {
+                    this.player.velocity.y = this.player.jumpStrength;
+                    this.player.onGround = false;
+                }
+                
+                // 应用重力
+                this.player.mesh.position.y += this.player.velocity.y * delta;
+                this.player.velocity.y -= this.player.gravity * delta;
+                
+                // 限制最低高度
+                if (this.player.mesh.position.y < 1) {
+                    this.player.mesh.position.y = 1;
+                    this.player.velocity.y = 0;
+                    this.player.onGround = true;
+                } else {
+                    this.player.onGround = false;
+                }
+            }
+
+            checkCollisions() {
+                // 简单碰撞检测
+                const playerPos = this.player.mesh.position;
+                
+                this.gameObjects.forEach(obj => {
+                    if (obj.type === 'resource' || obj.type === 'ship_wreck') {
+                        const dist = playerPos.distanceTo(obj.mesh.position);
+                        if (dist < 2) {
+                            obj.inRange = true;
+                        } else {
+                            obj.inRange = false;
+                        }
+                    }
+                });
+            }
+
+            checkInteractions() {
+                // 资源收集 (E键)
+                if (window.keyboardState['KeyE']) {
+                    this.gameObjects.forEach((obj, index) => {
+                        if (obj.interactable && obj.inRange) {
+                            if (obj.type === 'resource') {
+                                // 收集资源
+                                this.player.addToInventory(obj.resourceType, obj.amount);
+                                this.sceneManager.removeFromScene(obj.mesh);
+                                this.gameObjects.splice(index, 1);
+                                
+                                this.showNotification(`收集了 ${obj.amount} 个 ${obj.resourceType}`);
+                                this.checkQuestProgress();
+                            } else if (obj.type === 'ship_wreck') {
+                                // 从飞船残骸获取初始物资
+                                if (!obj.looted) {
+                                    this.player.addToInventory('食物', 5);
+                                    this.player.addToInventory('水', 3);
+                                    this.player.addToInventory('急救包', 1);
+                                    obj.looted = true;
+                                    
+                                    this.showNotification('从飞船残骸中找到了一些物资', 'success');
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            checkQuestProgress() {
+                this.quests.forEach(quest => {
+                    if (quest.completed) return;
+                    
+                    switch (quest.target.type) {
+                        case 'collect':
+                            const collected = this.player.inventory.get(quest.target.name) || 0;
+                            if (collected >= quest.target.amount) {
+                                this.completeQuest(quest);
+                            }
+                            break;
+                            
+                        case 'build':
+                            const built = this.buildings.filter(b => b.type === quest.target.name).length;
+                            if (built >= quest.target.amount) {
+                                this.completeQuest(quest);
+                            }
+                            break;
+                    }
+                });
+            }
+
+            completeQuest(quest) {
+                quest.completed = true;
+                
+                // 奖励资源
+                if (quest.reward.resources) {
+                    Object.entries(quest.reward.resources).forEach(([res, amount]) => {
+                        this.player.addToInventory(res, amount);
+                    });
+                }
+                
+                // 解锁科技
+                if (quest.reward.tech && quest.reward.tech !== '') {
+                    this.techTree.unlock(quest.reward.tech, this.player);
+                    this.techTree.updateTechPanel();
+                }
+                
+                this.showNotification(`完成任务: ${quest.title}`, 'success');
+            }
+
+            updateHUD() {
+                // 更新资源面板
+                const resourcesPanel = document.getElementById('resources');
+                let resourcesHTML = '<h3>资源 (按I键切换)</h3>';
+                
+                this.player.inventory.forEach((amount, name) => {
+                    resourcesHTML += `<div>${name}: ${amount}</div>`;
+                });
+                
+                resourcesPanel.innerHTML = resourcesHTML;
+                
+                // 更新任务面板
+                const questPanel = document.getElementById('quest-log');
+                let questHTML = '<h3>任务日志 (按Q键切换)</h3>';
+                
+                this.quests.forEach(quest => {
+                    questHTML += `
+                        <div class="quest.className = 'notification';
+                if (type) notification.classList.add(type);
+                notification.style.opacity = 1;
+                
+                setTimeout(() => {
+                    notification.style.opacity = 0;
+                }, 3000);
+            }
+
+            getQuestProgressText(quest) {
+                if (quest.completed) return '状态: 已完成';
+                
+                switch (quest.target.type) {
+                    case 'collect':
+                        const collected = this.player.inventory.get(quest.target.name) || 0;
+                        return `进度: ${collected}/${quest.target.amount}`;
+                    case 'build':
+                        const built = this.buildings.filter(b => b.type === quest.target.name).length;
+                        return `进度: ${built}/${quest.target.amount}`;
+                    default:
+                        return '进行中...';
+                }
+            }
+
+            gameOver() {
+                this.isPaused = true;
+                this.showNotification('所有克隆体已耗尽，任务失败', 'error');
+                
+                // 显示游戏结束模态框
+                const gameOverModal = document.createElement('div');
+                gameOverModal.className = 'modal visible';
+                gameOverModal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-title">任务失败</div>
+                        <p>所有克隆体已耗尽，您无法继续探索。</p>
+                        <p>您在赤岩星上存活了 ${this.time.day} 天 ${Math.floor(this.time.hour)} 小时。</p>
+                        <button id="restart-game">重新开始</button>
+                    </div>
+                `;
+                document.body.appendChild(gameOverModal);
+                
+                document.getElementById('restart-game').addEventListener('click', () => {
+                    location.reload();
+                });
+            }
+
+            // 存档功能
+            saveGame(saveName) {
+                if (!saveName) saveName = `存档_${new Date().toLocaleString()}`;
+                
+                const saveData = {
+                    timestamp: Date.now(),
+                    player: {
+                        health: this.player.health,
+                        oxygen: this.player.oxygen,
+                        temperature: this.player.temperature,
+                        suitIntegrity: this.player.suitIntegrity,
+                        cloneCount: this.player.cloneCount,
+                        position: {
+                            x: this.player.mesh.position.x,
+                            y: this.player.mesh.position.y,
+                            z: this.player.mesh.position.z
+                        },
+                        inventory: Array.from(this.player.inventory.entries())
+                    },
+                    quests: this.quests.map(q => ({
+                        id: q.id,
+                        completed: q.completed
+                    })),
+                    tech: Array.from(this.techTree.unlocked),
+                    buildings: this.buildings.map(b => ({
+                        id: b.id,
+                        type: b.type,
+                        position: {
+                            x: b.position.x,
+                            y: b.position.y,
+                            z: b.position.z
+                        }
+                    })),
+                    gameTime: this.time
+                };
+                
+                // 加密存档数据 (简单处理)
+                const encryptedData = btoa(JSON.stringify(saveData));
+                localStorage.setItem(`save_${Date.now()}`, JSON.stringify({
+                    name: saveName,
+                    data: encryptedData,
+                    date: new Date().toLocaleString()
+                }));
+                
+                this.showNotification(`游戏已保存: ${saveName}`, 'success');
+                document.getElementById('save-modal').classList.remove('visible');
+            }
+
+            // 加载存档
+            loadGame(saveData) {
+                try {
+                    // 解密数据
+                    const decryptedData = JSON.parse(atob(saveData.data));
+                    
+                    // 恢复玩家状态
+                    this.player.health = decryptedData.player.health;
+                    this.player.oxygen = decryptedData.player.oxygen;
+                    this.player.temperature = decryptedData.player.temperature;
+                    this.player.suitIntegrity = decryptedData.player.suitIntegrity;
+                    this.player.cloneCount = decryptedData.player.cloneCount;
+                    
+                    // 恢复位置
+                    this.player.mesh.position.set(
+                        decryptedData.player.position.x,
+                        decryptedData.player.position.y,
+                        decryptedData.player.position.z
+                    );
+                    
+                    // 恢复 inventory
+                    this.player.inventory.clear();
+                    decryptedData.player.inventory.forEach(([item, amount]) => {
+                        this.player.inventory.set(item, amount);
+                    });
+                    
+                    // 恢复任务状态
+                    decryptedData.quests.forEach(savedQuest => {
+                        const quest = this.quests.find(q => q.id === savedQuest.id);
+                        if (quest) quest.completed = savedQuest.completed;
+                    });
+                    
+                    // 恢复科技
+                    this.techTree.unlocked.clear();
+                    decryptedData.tech.forEach(tech => {
+                        this.techTree.unlocked.add(tech);
+                    });
+                    this.techTree.updateTechPanel();
+                    
+                    // 恢复建筑
+                    this.buildings.forEach(b => {
+                        this.sceneManager.removeFromScene(b.mesh);
+                    });
+                    this.buildings = [];
+                    
+                    decryptedData.buildings.forEach(savedBuilding => {
+                        const buildings = {
+                            wind_shelter: {
+                                model: () => {
+                                    const geometry = new THREE.CylinderGeometry(3, 4, 2, 8);
+                                    const material = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+                                    return new THREE.Mesh(geometry, material);
+                                }
+                            },
+                            campfire: {
+                                model: () => {
+                                    const geometry = new THREE.CylinderGeometry(1, 1.5, 0.5, 6);
+                                    const material = new THREE.MeshStandardMaterial({ color: 0x553311 });
+                                    const campfire = new THREE.Mesh(geometry, material);
+                                    
+                                    const fireLight = new THREE.PointLight(0xff6600, 2, 3);
+                                    fireLight.position.set(0, 1, 0);
+                                    campfire.add(fireLight);
+                                    
+                                    return campfire;
+                                }
+                            }
+                        };
+                        
+                        if (buildings[savedBuilding.type]) {
+                            const structure = buildings[savedBuilding.type].model();
+                            structure.position.set(
+                                savedBuilding.position.x,
+                                savedBuilding.position.y,
+                                savedBuilding.position.z
+                            );
+                            this.sceneManager.addToScene(structure);
+                            
+                            this.buildings.push({
+                                id: savedBuilding.id,
+                                type: savedBuilding.type,
+                                mesh: structure,
+                                position: structure.position.clone()
+                            });
+                        }
+                    });
+                    
+                    // 恢复游戏时间
+                    this.time = decryptedData.gameTime;
+                    
+                    this.showNotification(`已加载存档: ${saveData.name}`, 'success');
+                    document.getElementById('load-modal').classList.remove('visible');
+                } catch (e) {
+                    console.error('加载存档失败', e);
+                    this.showNotification('存档加载失败', 'error');
+                }
+            }
+        }
+
+        // 加载存档槽
+        function loadGameSlots() {
+            const saveSlotsContainer = document.getElementById('save-slots');
+            saveSlotsContainer.innerHTML = '';
+            
+            // 获取所有存档
+            const saves = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('save_')) {
+                    saves.push(JSON.parse(localStorage.getItem(key)));
+                }
+            }
+            
+            // 按时间排序
+            saves.sort((a, b) => b.data.timestamp - a.data.timestamp);
+            
+            if (saves.length === 0) {
+                saveSlotsContainer.innerHTML = '<p>没有找到存档</p>';
+                return;
+            }
+            
+            // 显示存档
+            saves.forEach(save => {
+                const slot = document.createElement('div');
+                slot.className = 'save-slot';
+                slot.innerHTML = `
+                    <strong>${save.name}</strong>
+                    <div>${save.date}</div>
+                `;
+                
+                slot.addEventListener('click', () => {
+                    game.loadGame(save);
+                });
+                
+                saveSlotsContainer.appendChild(slot);
+            });
+        }
+
+        // 初始化保存按钮
+        document.getElementById('do-save').addEventListener('click', () => {
+            const saveName = document.getElementById('save-name').value;
+            game.saveGame(saveName || undefined);
+        });
+
+        // 移动端控制
+        const joystick = document.querySelector('.joystick');
+        const joystickThumb = document.querySelector('.joystick-thumb');
+        let isDragging = false;
+        const joystickCenter = { x: joystick.offsetWidth / 2, y: joystick.offsetHeight / 2 };
+        const joystickRange = joystick.offsetWidth / 2 - 10;
+
+        joystick.addEventListener('mousedown', startJoystick);
+        joystick.addEventListener('touchstart', startJoystick, { passive: true });
+        document.addEventListener('mousemove', moveJoystick);
+        document.addEventListener('touchmove', moveJoystick, { passive: true });
+        document.addEventListener('mouseup', endJoystick);
+        document.addEventListener('touchend', endJoystick);
+
+        function startJoystick(e) {
+            isDragging = true;
+            moveJoystick(e);
+        }
+
+        function moveJoystick(e) {
+            if (!isDragging) return;
+            
+            let clientX, clientY;
+            if (e.type.includes('mouse')) {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            } else {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+            
+            const rect = joystick.getBoundingClientRect();
+            const x = clientX - rect.left - joystickCenter.x;
+            const y = clientY - rect.top - joystickCenter.y;
+            const distance = Math.sqrt(x * x + y * y);
+            
+            // 限制在范围内
+            if (distance > joystickRange) {
+                const scale = joystickRange / distance;
+                joystickThumb.style.transform = `translate(${x * scale - joystickCenter.x}px, ${y * scale - joystickCenter.y}px)`;
+            } else {
+                joystickThumb.style.transform = `translate(${x - joystickCenter.x}px, ${y - joystickCenter.y}px)`;
+            }
+            
+            // 转换为移动输入
+            const normalizedX = x / joystickRange;
+            const normalizedY = y / joystickRange;
+            
+            // 更新键盘状态模拟
+            window.keyboardState['KeyW'] = normalizedY < -0.1;
+            window.keyboardState['KeyS'] = normalizedY > 0.1;
+            window.keyboardState['KeyA'] = normalizedX < -0.1;
+            window.keyboardState['KeyD'] = normalizedX > 0.1;
+        }
+
+        function endJoystick() {
+            isDragging = false;
+            joystickThumb.style.transform = `translate(-50%, -50%)`;
+            
+            // 重置移动状态
+            window.keyboardState['KeyW'] = false;
+            window.keyboardState['KeyS'] = false;
+            window.keyboardState['KeyA'] = false;
+            window.keyboardState['KeyD'] = false;
+        }
+
+        // 移动端动作按钮
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                const action = e.currentTarget.dataset.action;
+                switch (action) {
+                    case 'collect':
+                        window.keyboardState['KeyE'] = true;
+                        break;
+                    case 'menu':
+                        document.getElementById('menu-modal').classList.add('visible');
+                        break;
+                    case 'help':
+                        document.getElementById('hud-help').classList.toggle('visible');
+                        break;
+                }
+            });
+            
+            btn.addEventListener('touchend', (e) => {
+                const action = e.currentTarget.dataset.action;
+                if (action === 'collect') {
+                    window.keyboardState['KeyE'] = false;
+                }
+            });
+        });
+
+        // 启动游戏
+        let game;
+        window.addEventListener('load', () => {
+            game = new SpaceExplorationGame();
+            game.start();
+        });
+    </script>
 </body>
 </html>
+
+
+
+
+
