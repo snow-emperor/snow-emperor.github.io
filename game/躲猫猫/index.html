@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>现实版躲猫猫</title>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <!-- 高德地图API -->
+    <script src="https://webapi.amap.com/maps?v=2.0&key=你的高德地图Key"></script>
     <style>
         * {
             margin: 0;
@@ -143,6 +145,8 @@
         }
         
         #gameMap {
+            width: 100%;
+            height: 500px;
             background: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             margin: 20px 0;
@@ -230,6 +234,12 @@
             margin: 0;
         }
         
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
         @media (max-width: 768px) {
             .game-info {
                 flex-direction: column;
@@ -241,6 +251,10 @@
             
             .host-controls {
                 flex-direction: column;
+            }
+            
+            .config-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -275,14 +289,25 @@
                 </div>
                 
                 <div class="form-group" id="gameConfig" style="display: none;">
-                    <label for="hideTime">躲藏时间（分钟）</label>
-                    <input type="number" id="hideTime" value="5" min="1" max="30">
-                    
-                    <label for="locationInterval">位置更新间隔（分钟）</label>
-                    <input type="number" id="locationInterval" value="10" min="5" max="30">
-                    
-                    <label for="locationDuration">位置显示时长（秒）</label>
-                    <input type="number" id="locationDuration" value="60" min="10" max="120">
+                    <h3>游戏配置</h3>
+                    <div class="config-grid">
+                        <div>
+                            <label for="hideTime">躲藏时间（分钟）</label>
+                            <input type="number" id="hideTime" value="5" min="1" max="30">
+                        </div>
+                        <div>
+                            <label for="locationInterval">扫描冷却（分钟）</label>
+                            <input type="number" id="locationInterval" value="10" min="5" max="30">
+                        </div>
+                        <div>
+                            <label for="locationDuration">扫描时间（秒）</label>
+                            <input type="number" id="locationDuration" value="60" min="10" max="120">
+                        </div>
+                        <div>
+                            <label for="scanCount">扫描次数</label>
+                            <input type="number" id="scanCount" value="3" min="1" max="10">
+                        </div>
+                    </div>
                 </div>
                 
                 <button id="startBtn">开始</button>
@@ -331,11 +356,15 @@
                         <h3>你的角色</h3>
                         <p id="playerRole">未知</p>
                     </div>
+                    <div class="info-card">
+                        <h3>扫描次数</h3>
+                        <p id="scanCountDisplay">0/0</p>
+                    </div>
                 </div>
                 
                 <div id="statusMessage" class="status-message"></div>
                 
-                <canvas id="gameMap" width="800" height="500"></canvas>
+                <div id="gameMap"></div>
                 
                 <div class="controls">
                     <button id="caughtBtn" class="caught-btn">我被抓住了</button>
@@ -370,8 +399,10 @@
         // 游戏配置
         let gameConfig = {
             hideTime: 5, // 躲藏时间（分钟）
-            locationInterval: 10, // 位置更新间隔（分钟）
-            locationDuration: 60 // 位置显示时长（秒）
+            locationInterval: 10, // 扫描冷却（分钟）
+            locationDuration: 60, // 扫描时间（秒）
+            scanCount: 3, // 扫描次数
+            scansRemaining: 3 // 剩余扫描次数
         };
 
         // 游戏状态
@@ -393,6 +424,8 @@
         let gameTimer = null;
         let locationUpdateTimer = null;
         let locationDisplayTimer = null;
+        let map = null;
+        let markers = {};
 
         // DOM元素
         const setupPhase = document.getElementById('setupPhase');
@@ -415,6 +448,7 @@
         const gameStateText = document.getElementById('gameStateText');
         const timerDisplay = document.getElementById('timer');
         const playerRole = document.getElementById('playerRole');
+        const scanCountDisplay = document.getElementById('scanCountDisplay');
         const statusMessage = document.getElementById('statusMessage');
         const gameMap = document.getElementById('gameMap');
         const caughtBtn = document.getElementById('caughtBtn');
@@ -423,6 +457,7 @@
         const hideTimeInput = document.getElementById('hideTime');
         const locationIntervalInput = document.getElementById('locationInterval');
         const locationDurationInput = document.getElementById('locationDuration');
+        const scanCountInput = document.getElementById('scanCount');
 
         // 初始化
         function init() {
@@ -493,6 +528,8 @@
             gameConfig.hideTime = parseInt(hideTimeInput.value);
             gameConfig.locationInterval = parseInt(locationIntervalInput.value);
             gameConfig.locationDuration = parseInt(locationDurationInput.value);
+            gameConfig.scanCount = parseInt(scanCountInput.value);
+            gameConfig.scansRemaining = gameConfig.scanCount;
             
             currentPlayer.isHost = true;
             currentPlayer.role = PlayerRole.UNASSIGNED;
@@ -721,6 +758,11 @@
                     }
                     break;
                     
+                case 'scanUpdate':
+                    gameConfig.scansRemaining = data.scansRemaining;
+                    updateScanCountDisplay();
+                    break;
+                    
                 case 'gameOver':
                     alert('游戏结束！' + data.message);
                     resetGame();
@@ -765,10 +807,45 @@
                 case GameState.HIDING:
                 case GameState.SEEKING:
                     gamePhase.classList.add('active');
+                    // 初始化地图
+                    if (phase === GameState.HIDING) {
+                        initMap();
+                    }
                     break;
             }
             
             gameState = phase;
+        }
+
+        // 初始化高德地图
+        function initMap() {
+            if (map) {
+                map.destroy();
+                map = null;
+                markers = {};
+            }
+            
+            // 获取当前位置或使用默认位置
+            let center = [116.397428, 39.90923]; // 默认北京中心
+            if (currentPlayer.position) {
+                center = [currentPlayer.position.longitude, currentPlayer.position.latitude];
+            }
+            
+            map = new AMap.Map('gameMap', {
+                viewMode: '3D',
+                zoom: 15,
+                center: center,
+                mapStyle: 'amap://styles/normal'
+            });
+            
+            // 添加比例尺
+            map.addControl(new AMap.Scale());
+            
+            // 添加工具栏
+            map.addControl(new AMap.ToolBar());
+            
+            // 更新所有玩家位置
+            updateGameMap();
         }
 
         // 更新玩家列表
@@ -780,7 +857,7 @@
                 playerElement.className = `player ${player.isReady ? 'ready' : ''} ${player.role}`;
                 
                 let playerActions = '';
-                if (currentPlayer.isHost && playerId !== currentPlayer.id) {
+                if (currentPlayer.isHost) {
                     playerActions = `
                         <div class="player-actions">
                             <button class="assign-cat-btn" data-player-id="${playerId}">指定为猫</button>
@@ -994,9 +1071,19 @@
                 // 更新自己的位置
                 getPlayerLocation();
                 
-                // 广播老鼠位置给所有玩家（持续locationDuration秒）
-                if (currentPlayer.isHost) {
+                // 如果还有扫描次数，广播老鼠位置给所有玩家
+                if (currentPlayer.isHost && gameConfig.scansRemaining > 0) {
                     broadcastMousePositions();
+                    
+                    // 减少扫描次数
+                    gameConfig.scansRemaining--;
+                    updateScanCountDisplay();
+                    
+                    // 广播扫描次数更新
+                    broadcast({
+                        type: 'scanUpdate',
+                        scansRemaining: gameConfig.scansRemaining
+                    });
                     
                     // 设置定时器停止显示老鼠位置
                     clearTimeout(locationDisplayTimer);
@@ -1005,7 +1092,17 @@
                         // 在实际实现中，这里应该清除老鼠的位置显示
                     }, gameConfig.locationDuration * 1000);
                 }
+                
+                // 如果没有扫描次数了，停止计时器
+                if (gameConfig.scansRemaining <= 0) {
+                    clearInterval(locationUpdateTimer);
+                }
             }, gameConfig.locationInterval * 60 * 1000);
+        }
+
+        // 更新扫描次数显示
+        function updateScanCountDisplay() {
+            scanCountDisplay.textContent = `${gameConfig.scansRemaining}/${gameConfig.scanCount}`;
         }
 
         // 广播老鼠位置
@@ -1052,6 +1149,9 @@
             // 更新角色显示
             playerRole.textContent = getRoleText(currentPlayer.role);
             
+            // 更新扫描次数显示
+            updateScanCountDisplay();
+            
             // 更新玩家列表
             updateGamePlayersList();
             
@@ -1068,38 +1168,58 @@
 
         // 更新游戏地图
         function updateGameMap() {
-            const ctx = gameMap.getContext('2d');
-            ctx.clearRect(0, 0, gameMap.width, gameMap.height);
+            if (!map) return;
             
-            // 绘制背景
-            ctx.fillStyle = '#e0e0e0';
-            ctx.fillRect(0, 0, gameMap.width, gameMap.height);
+            // 清除所有标记
+            for (const playerId in markers) {
+                map.remove(markers[playerId]);
+            }
+            markers = {};
             
-            // 绘制玩家位置
+            // 添加玩家位置标记
             for (const playerId in players) {
                 const player = players[playerId];
                 if (player.position) {
-                    // 简化处理：将经纬度映射到Canvas坐标
-                    const x = (player.position.longitude + 180) * (gameMap.width / 360);
-                    const y = (90 - player.position.latitude) * (gameMap.height / 180);
+                    const position = [player.position.longitude, player.position.latitude];
                     
-                    // 根据角色设置颜色
+                    // 根据角色设置标记颜色和内容
+                    let markerContent = '';
+                    let markerColor = '';
+                    
                     if (player.role === PlayerRole.CAT) {
-                        ctx.fillStyle = player.isCaught ? '#999' : '#f44336'; // 红色表示猫
+                        markerColor = '#f44336'; // 红色表示猫
+                        markerContent = `<div style="background-color: ${markerColor}; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">猫</div>`;
                     } else {
-                        ctx.fillStyle = player.isCaught ? '#999' : '#4CAF50'; // 绿色表示老鼠
+                        markerColor = '#4CAF50'; // 绿色表示老鼠
+                        markerContent = `<div style="background-color: ${markerColor}; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">鼠</div>`;
                     }
                     
-                    // 绘制玩家位置
-                    ctx.beginPath();
-                    ctx.arc(x, y, 10, 0, Math.PI * 2);
-                    ctx.fill();
+                    // 创建标记
+                    const marker = new AMap.Marker({
+                        position: position,
+                        content: markerContent,
+                        offset: new AMap.Pixel(-10, -10)
+                    });
                     
-                    // 绘制玩家名称
-                    ctx.fillStyle = '#000';
-                    ctx.font = '12px Arial';
-                    ctx.fillText(player.name, x - 15, y - 15);
+                    // 添加标记到地图
+                    map.add(marker);
+                    markers[playerId] = marker;
+                    
+                    // 添加信息窗口
+                    const infoWindow = new AMap.InfoWindow({
+                        content: `<div>${player.name} (${getRoleText(player.role)})</div>`,
+                        offset: new AMap.Pixel(0, -30)
+                    });
+                    
+                    marker.on('click', () => {
+                        infoWindow.open(map, marker.getPosition());
+                    });
                 }
+            }
+            
+            // 如果当前玩家有位置，将地图中心设置为当前位置
+            if (currentPlayer.position) {
+                map.setCenter([currentPlayer.position.longitude, currentPlayer.position.latitude]);
             }
         }
 
@@ -1242,6 +1362,13 @@
             // 关闭所有连接
             for (const connId in connections) {
                 connections[connId].close();
+            }
+            
+            // 销毁地图
+            if (map) {
+                map.destroy();
+                map = null;
+                markers = {};
             }
             
             // 重置游戏状态
