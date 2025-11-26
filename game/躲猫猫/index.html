@@ -86,7 +86,6 @@
             font-size: 1rem;
             font-weight: bold;
             transition: all 0.3s;
-            width: 100%;
             margin-top: 10px;
         }
         
@@ -196,6 +195,41 @@
             background: #f44336;
         }
         
+        .host-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .host-controls button {
+            flex: 1;
+        }
+        
+        .player-controls {
+            margin-top: 15px;
+        }
+        
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .player-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .player-actions button {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            margin: 0;
+        }
+        
         @media (max-width: 768px) {
             .game-info {
                 flex-direction: column;
@@ -203,6 +237,10 @@
             
             .info-card {
                 margin: 5px 0;
+            }
+            
+            .host-controls {
+                flex-direction: column;
             }
         }
     </style>
@@ -263,12 +301,16 @@
                 </div>
                 
                 <div id="hostControls">
-                    <button id="startGameBtn" disabled>开始游戏</button>
-                    <button id="assignCatBtn">指定猫</button>
+                    <div class="host-controls">
+                        <button id="randomCatBtn">随机指定猫</button>
+                        <button id="startGameBtn" disabled>开始游戏</button>
+                    </div>
                 </div>
                 
                 <div id="playerControls">
-                    <button id="readyBtn">准备</button>
+                    <div class="player-controls">
+                        <button id="readyBtn">准备</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -367,8 +409,8 @@
         const playersContainer = document.getElementById('playersContainer');
         const hostControls = document.getElementById('hostControls');
         const playerControls = document.getElementById('playerControls');
+        const randomCatBtn = document.getElementById('randomCatBtn');
         const startGameBtn = document.getElementById('startGameBtn');
-        const assignCatBtn = document.getElementById('assignCatBtn');
         const readyBtn = document.getElementById('readyBtn');
         const gameStateText = document.getElementById('gameStateText');
         const timerDisplay = document.getElementById('timer');
@@ -387,8 +429,8 @@
             // 事件监听
             roomActionSelect.addEventListener('change', toggleRoomAction);
             startBtn.addEventListener('click', handleStart);
+            randomCatBtn.addEventListener('click', assignRandomCat);
             startGameBtn.addEventListener('click', startGame);
-            assignCatBtn.addEventListener('click', assignCat);
             readyBtn.addEventListener('click', toggleReady);
             caughtBtn.addEventListener('click', declareCaught);
             leaveGameBtn.addEventListener('click', leaveGame);
@@ -454,6 +496,7 @@
             
             currentPlayer.isHost = true;
             currentPlayer.role = PlayerRole.UNASSIGNED;
+            currentPlayer.isReady = true; // 房主默认准备
             
             // 使用自己的peer ID作为房间号
             const roomId = currentPlayer.id;
@@ -603,6 +646,7 @@
                     break;
                     
                 case 'assignCat':
+                    // 更新猫的分配
                     if (currentPlayer.isHost) {
                         assignCatToPlayer(data.catPlayerId);
                     } else {
@@ -614,6 +658,7 @@
                             currentPlayer.role = PlayerRole.MOUSE;
                             playerRole.textContent = '老鼠';
                         }
+                        updatePlayersList();
                     }
                     break;
                     
@@ -733,15 +778,39 @@
                 const player = players[playerId];
                 const playerElement = document.createElement('div');
                 playerElement.className = `player ${player.isReady ? 'ready' : ''} ${player.role}`;
+                
+                let playerActions = '';
+                if (currentPlayer.isHost && playerId !== currentPlayer.id) {
+                    playerActions = `
+                        <div class="player-actions">
+                            <button class="assign-cat-btn" data-player-id="${playerId}">指定为猫</button>
+                        </div>
+                    `;
+                }
+                
                 playerElement.innerHTML = `
                     <span>${player.name} ${player.isHost ? '(房主)' : ''}</span>
-                    <span>${player.isReady ? '已准备' : '未准备'} | ${getRoleText(player.role)}</span>
+                    <div>
+                        <span>${player.isReady ? '已准备' : '未准备'} | ${getRoleText(player.role)}</span>
+                        ${playerActions}
+                    </div>
                 `;
                 playersContainer.appendChild(playerElement);
             }
             
+            // 为指定猫按钮添加事件监听
+            document.querySelectorAll('.assign-cat-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const playerId = e.target.getAttribute('data-player-id');
+                    assignCatToPlayer(playerId);
+                });
+            });
+            
             // 更新游戏中的玩家列表
             updateGamePlayersList();
+            
+            // 检查是否所有玩家都准备
+            checkAllReady();
         }
 
         // 更新游戏中的玩家列表
@@ -803,8 +872,8 @@
             });
         }
 
-        // 指定猫
-        function assignCat() {
+        // 随机指定猫
+        function assignRandomCat() {
             if (!currentPlayer.isHost) return;
             
             // 随机选择一名玩家作为猫
@@ -813,12 +882,6 @@
             const catPlayerId = playerIds[randomIndex];
             
             assignCatToPlayer(catPlayerId);
-            
-            // 广播猫的分配
-            broadcast({
-                type: 'assignCat',
-                catPlayerId: catPlayerId
-            });
         }
 
         // 分配猫给特定玩家
@@ -834,6 +897,14 @@
             players[catPlayerId].role = PlayerRole.CAT;
             
             updatePlayersList();
+            
+            // 广播猫的分配
+            broadcast({
+                type: 'assignCat',
+                catPlayerId: catPlayerId
+            });
+            
+            // 检查是否所有玩家都准备
             checkAllReady();
         }
 
