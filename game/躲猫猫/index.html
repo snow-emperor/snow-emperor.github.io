@@ -138,6 +138,17 @@
             text-decoration: line-through;
         }
         
+        .player.requesting-catch {
+            background: rgba(255, 193, 7, 0.3);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { background: rgba(255, 193, 7, 0.3); }
+            50% { background: rgba(255, 193, 7, 0.6); }
+            100% { background: rgba(255, 193, 7, 0.3); }
+        }
+        
         .game-area {
             display: flex;
             flex-direction: column;
@@ -238,6 +249,10 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
+        }
+        
+        .catch-btn {
+            background: #ff9800;
         }
         
         @media (max-width: 768px) {
@@ -364,7 +379,7 @@
                 
                 <div id="statusMessage" class="status-message"></div>
                 
-                <div id="gameMap"></div>
+                <div id="gameMap" style="display: none;"></div>
                 
                 <div class="controls">
                     <button id="caughtBtn" class="caught-btn">我被抓住了</button>
@@ -414,7 +429,8 @@
             isReady: false,
             isHost: false,
             position: null,
-            isCaught: false
+            isCaught: false,
+            requestingCatch: false // 新增：是否请求被抓
         };
         
         let players = {};
@@ -649,7 +665,8 @@
                             role: PlayerRole.UNASSIGNED,
                             isReady: false,
                             position: null,
-                            isCaught: false
+                            isCaught: false,
+                            requestingCatch: false
                         };
                         updatePlayersList();
                         
@@ -736,6 +753,30 @@
                     }
                     break;
                     
+                case 'requestCatch':
+                    if (currentPlayer.isHost) {
+                        handleRequestCatch(data.playerId);
+                    } else {
+                        // 更新玩家请求被抓状态
+                        if (players[data.playerId]) {
+                            players[data.playerId].requestingCatch = true;
+                        }
+                        updateGamePlayersList();
+                    }
+                    break;
+                    
+                case 'cancelCatch':
+                    if (currentPlayer.isHost) {
+                        handleCancelCatch(data.playerId);
+                    } else {
+                        // 更新玩家请求被抓状态
+                        if (players[data.playerId]) {
+                            players[data.playerId].requestingCatch = false;
+                        }
+                        updateGamePlayersList();
+                    }
+                    break;
+                    
                 case 'playerCaught':
                     if (currentPlayer.isHost) {
                         handlePlayerCaught(data.playerId, data.catPlayerId);
@@ -744,6 +785,7 @@
                         if (players[data.playerId]) {
                             players[data.playerId].isCaught = true;
                             players[data.playerId].role = PlayerRole.CAT;
+                            players[data.playerId].requestingCatch = false;
                         }
                         updateGamePlayersList();
                         
@@ -751,9 +793,16 @@
                         if (data.playerId === currentPlayer.id) {
                             currentPlayer.role = PlayerRole.CAT;
                             currentPlayer.isCaught = true;
+                            currentPlayer.requestingCatch = false;
                             playerRole.textContent = '猫';
                             statusMessage.textContent = '你已被抓住，现在你也是猫了！';
                             statusMessage.className = 'status-message status-seeking';
+                            
+                            // 如果是猫，显示地图
+                            if (currentPlayer.role === PlayerRole.CAT) {
+                                gameMap.style.display = 'block';
+                                initMap();
+                            }
                         }
                     }
                     break;
@@ -807,9 +856,12 @@
                 case GameState.HIDING:
                 case GameState.SEEKING:
                     gamePhase.classList.add('active');
-                    // 初始化地图
-                    if (phase === GameState.HIDING) {
+                    // 初始化地图（只有猫显示地图）
+                    if (phase === GameState.HIDING && currentPlayer.role === PlayerRole.CAT) {
+                        gameMap.style.display = 'block';
                         initMap();
+                    } else {
+                        gameMap.style.display = 'none';
                     }
                     break;
             }
@@ -896,13 +948,49 @@
             for (const playerId in players) {
                 const player = players[playerId];
                 const playerElement = document.createElement('div');
-                playerElement.className = `player ${player.role} ${player.isCaught ? 'caught' : ''}`;
+                let playerActions = '';
+                
+                // 如果是猫，并且当前玩家也是猫，并且有老鼠请求被抓，显示"抓住了"按钮
+                if (currentPlayer.role === PlayerRole.CAT && 
+                    player.role === PlayerRole.MOUSE && 
+                    !player.isCaught && 
+                    player.requestingCatch) {
+                    playerActions = `
+                        <div class="player-actions">
+                            <button class="catch-btn" data-player-id="${playerId}">抓住了</button>
+                        </div>
+                    `;
+                }
+                
+                playerElement.className = `player ${player.role} ${player.isCaught ? 'caught' : ''} ${player.requestingCatch ? 'requesting-catch' : ''}`;
                 playerElement.innerHTML = `
                     <span>${player.name}</span>
-                    <span>${getRoleText(player.role)} ${player.isCaught ? '(已抓住)' : ''}</span>
+                    <div>
+                        <span>${getRoleText(player.role)} ${player.isCaught ? '(已抓住)' : ''} ${player.requestingCatch ? '(请求被抓)' : ''}</span>
+                        ${playerActions}
+                    </div>
                 `;
                 gamePlayersContainer.appendChild(playerElement);
             }
+            
+            // 为抓住了按钮添加事件监听
+            document.querySelectorAll('.catch-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const playerId = e.target.getAttribute('data-player-id');
+                    confirmCatch(playerId);
+                });
+            });
+        }
+
+        // 确认抓住
+        function confirmCatch(playerId) {
+            if (currentPlayer.role !== PlayerRole.CAT) return;
+            
+            sendToHost({
+                type: 'playerCaught',
+                playerId: playerId,
+                catPlayerId: currentPlayer.id
+            });
         }
 
         // 获取角色文本
@@ -1021,6 +1109,7 @@
             if (players[currentPlayer.id]) {
                 currentPlayer.role = players[currentPlayer.id].role;
                 currentPlayer.isCaught = players[currentPlayer.id].isCaught;
+                currentPlayer.requestingCatch = players[currentPlayer.id].requestingCatch;
             }
             
             // 获取玩家位置
@@ -1155,12 +1244,24 @@
             // 更新玩家列表
             updateGamePlayersList();
             
-            // 更新地图
-            updateGameMap();
+            // 更新地图（只有猫显示地图）
+            if (currentPlayer.role === PlayerRole.CAT) {
+                gameMap.style.display = 'block';
+                updateGameMap();
+            } else {
+                gameMap.style.display = 'none';
+            }
             
             // 根据角色显示/隐藏被抓按钮
             if (currentPlayer.role === PlayerRole.MOUSE && !currentPlayer.isCaught) {
                 caughtBtn.style.display = 'block';
+                if (currentPlayer.requestingCatch) {
+                    caughtBtn.textContent = '取消被抓请求';
+                    caughtBtn.style.background = '#ff9800';
+                } else {
+                    caughtBtn.textContent = '我被抓住了';
+                    caughtBtn.style.background = '#f44336';
+                }
             } else {
                 caughtBtn.style.display = 'none';
             }
@@ -1281,11 +1382,48 @@
         function declareCaught() {
             if (currentPlayer.role !== PlayerRole.MOUSE || currentPlayer.isCaught) return;
             
-            // 发送被抓消息给房主
-            sendToHost({
-                type: 'playerCaught',
-                playerId: currentPlayer.id,
-                catPlayerId: findCatPlayerId()
+            if (currentPlayer.requestingCatch) {
+                // 取消被抓请求
+                currentPlayer.requestingCatch = false;
+                sendToHost({
+                    type: 'cancelCatch',
+                    playerId: currentPlayer.id
+                });
+            } else {
+                // 请求被抓
+                currentPlayer.requestingCatch = true;
+                sendToHost({
+                    type: 'requestCatch',
+                    playerId: currentPlayer.id
+                });
+            }
+            
+            updateGameInterface();
+        }
+
+        // 处理请求被抓
+        function handleRequestCatch(playerId) {
+            if (!currentPlayer.isHost) return;
+            
+            players[playerId].requestingCatch = true;
+            
+            // 广播玩家状态更新
+            broadcast({
+                type: 'playersUpdate',
+                players: players
+            });
+        }
+
+        // 处理取消被抓请求
+        function handleCancelCatch(playerId) {
+            if (!currentPlayer.isHost) return;
+            
+            players[playerId].requestingCatch = false;
+            
+            // 广播玩家状态更新
+            broadcast({
+                type: 'playersUpdate',
+                players: players
             });
         }
 
@@ -1296,6 +1434,7 @@
             // 更新玩家状态
             players[playerId].isCaught = true;
             players[playerId].role = PlayerRole.CAT;
+            players[playerId].requestingCatch = false;
             
             // 广播被抓消息
             broadcast({
@@ -1385,7 +1524,8 @@
                 isReady: false,
                 isHost: false,
                 position: null,
-                isCaught: false
+                isCaught: false,
+                requestingCatch: false
             };
             
             // 切换到初始界面
