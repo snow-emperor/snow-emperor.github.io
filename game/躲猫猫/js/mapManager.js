@@ -19,7 +19,7 @@ const MapManager = {
         
         try {
             // 获取当前位置或使用默认位置
-            let center = [116.397428, 39.90923]; // 默认北京中心
+            let center = [108, 34]; // 默认学校中心
             
             if (GameStateManager.currentPlayer.position) {
                 center = [
@@ -31,7 +31,7 @@ const MapManager = {
             // 创建地图实例
             this.map = new AMap.Map(containerId, {
                 viewMode: '3D',
-                zoom: 15,
+                zoom: 16, // 增加初始缩放级别
                 center: center,
                 mapStyle: 'amap://styles/normal'
             });
@@ -46,6 +46,12 @@ const MapManager = {
             this.map.addControl(new AMap.OverView());
             
             console.log('地图初始化成功');
+            
+            // 如果是猫，立即定位到当前位置
+            if (GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.CAT) {
+                this.locateToCurrentPlayer();
+            }
+            
             return true;
         } catch (error) {
             console.error('地图初始化失败:', error);
@@ -82,12 +88,10 @@ const MapManager = {
             }
         }
         
-        // 如果当前玩家有位置，将地图中心设置为当前位置
-        if (GameStateManager.currentPlayer.position) {
-            this.map.setCenter([
-                GameStateManager.currentPlayer.position.longitude, 
-                GameStateManager.currentPlayer.position.latitude
-            ]);
+        // 如果是猫，将地图中心定位到猫的位置
+        if (GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.CAT && 
+            GameStateManager.currentPlayer.position) {
+            this.locateToCurrentPlayer();
         }
     },
     
@@ -110,6 +114,11 @@ const MapManager = {
             iconClass = 'fas fa-mouse';
         }
         
+        // 如果是当前玩家，添加特殊样式
+        const isCurrentPlayer = playerId === GameStateManager.currentPlayer.id;
+        const borderStyle = isCurrentPlayer ? '3px solid #FFD700' : '2px solid white';
+        const shadowStyle = isCurrentPlayer ? '0 0 10px #FFD700' : '0 2px 5px rgba(0,0,0,0.3)';
+        
         // 创建标记内容
         markerContent = `
             <div style="
@@ -122,10 +131,12 @@ const MapManager = {
                 justify-content: center; 
                 color: white; 
                 font-weight: bold;
-                border: 3px solid white;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                border: ${borderStyle};
+                box-shadow: ${shadowStyle};
+                position: relative;
             ">
                 <i class="${iconClass}"></i>
+                ${isCurrentPlayer ? '<div style="position: absolute; bottom: -5px; font-size: 10px; background: #FFD700; color: #000; padding: 1px 3px; border-radius: 3px;">你</div>' : ''}
             </div>
         `;
         
@@ -147,6 +158,7 @@ const MapManager = {
                     <h4 style="margin: 0 0 5px 0;">${player.name}</h4>
                     <p style="margin: 0;">${GameStateManager.getRoleText(player.role)}</p>
                     ${player.isCaught ? '<p style="margin: 5px 0 0 0; color: #f44336;">已抓住</p>' : ''}
+                    ${isCurrentPlayer ? '<p style="margin: 5px 0 0 0; color: #FFD700;">(你)</p>' : ''}
                 </div>
             `,
             offset: new AMap.Pixel(0, -45)
@@ -171,11 +183,15 @@ const MapManager = {
     locateToCurrentPlayer: function() {
         if (!this.map || !GameStateManager.currentPlayer.position) return;
         
-        this.map.setCenter([
+        const currentPos = [
             GameStateManager.currentPlayer.position.longitude,
             GameStateManager.currentPlayer.position.latitude
-        ]);
+        ];
+        
+        this.map.setCenter(currentPos);
         this.map.setZoom(16);
+        
+        console.log('地图已定位到玩家位置:', currentPos);
     },
     
     // 更新地图可见性
@@ -193,6 +209,9 @@ const MapManager = {
             
             // 更新玩家标记
             this.updatePlayerMarkers();
+            
+            // 定位到当前玩家位置
+            this.locateToCurrentPlayer();
         } else {
             gameMap.style.display = 'none';
         }
