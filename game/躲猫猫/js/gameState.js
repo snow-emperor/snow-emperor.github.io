@@ -181,6 +181,8 @@ const GameStateManager = {
         
         // 重置游戏配置
         this.config.scansRemaining = this.config.scanCount;
+        
+        console.log('游戏状态已重置');
     },
     
     // 完全重置游戏
