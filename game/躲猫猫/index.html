@@ -1536,18 +1536,30 @@
             
             // 重置当前玩家的游戏状态
             currentPlayer.role = PlayerRole.UNASSIGNED;
-            currentPlayer.isReady = false;
             currentPlayer.position = null;
             currentPlayer.isCaught = false;
             currentPlayer.requestingCatch = false;
             
+            // 房主保持准备状态，普通玩家重置准备状态
+            if (currentPlayer.isHost) {
+                currentPlayer.isReady = true;
+            } else {
+                currentPlayer.isReady = false;
+            }
+            
             // 重置所有玩家的游戏状态
             for (const playerId in players) {
                 players[playerId].role = PlayerRole.UNASSIGNED;
-                players[playerId].isReady = false;
                 players[playerId].position = null;
                 players[playerId].isCaught = false;
                 players[playerId].requestingCatch = false;
+                
+                // 房主保持准备状态，普通玩家重置准备状态
+                if (players[playerId].isHost) {
+                    players[playerId].isReady = true;
+                } else {
+                    players[playerId].isReady = false;
+                }
             }
             
             // 重置游戏配置
@@ -1555,6 +1567,13 @@
             
             // 更新玩家列表
             updatePlayersList();
+            
+            // 更新准备按钮显示
+            if (currentPlayer.isHost) {
+                readyBtn.textContent = '已准备';
+            } else {
+                readyBtn.textContent = '准备';
+            }
         }
 
         // 完全重置游戏
