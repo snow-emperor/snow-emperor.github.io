@@ -337,7 +337,9 @@ const UIManager = {
             
             const roleIcon = player.role === GameStateManager.PlayerRole.CAT ? 
                 '<i class="fas fa-cat role-icon role-cat"></i>' : 
-                '<i class="fas fa-mouse role-icon role-mouse"></i>';
+                player.role === GameStateManager.PlayerRole.MOUSE ?
+                '<i class="fas fa-mouse role-icon role-mouse"></i>' :
+                '<i class="fas fa-question role-icon"></i>';
             
             playerElement.innerHTML = `
                 <span>${player.name} ${player.isHost ? '<i class="fas fa-crown"></i>' : ''}</span>
@@ -459,7 +461,9 @@ const UIManager = {
         // 更新角色显示
         const roleIcon = GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.CAT ? 
             '<i class="fas fa-cat role-icon role-cat"></i>' : 
-            '<i class="fas fa-mouse role-icon role-mouse"></i>';
+            GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.MOUSE ?
+            '<i class="fas fa-mouse role-icon role-mouse"></i>' :
+            '<i class="fas fa-question role-icon"></i>';
         this.elements.playerRole.innerHTML = `${roleIcon} ${GameStateManager.getRoleText(GameStateManager.currentPlayer.role)}`;
         
         // 更新扫描次数显示
@@ -527,6 +531,9 @@ const UIManager = {
     
     // 开始位置更新计时器
     startLocationUpdateTimer: function() {
+        // 先立即获取一次位置
+        this.getPlayerLocation();
+        
         GameStateManager.timers.locationUpdateTimer = setInterval(() => {
             // 更新自己的位置
             this.getPlayerLocation();
@@ -588,6 +595,13 @@ const UIManager = {
             return;
         }
         
+        // 设置位置获取选项 - 增加超时时间并降低精度要求
+        const options = {
+            enableHighAccuracy: false, // 改为false以提高成功率
+            timeout: 15000, // 增加到15秒
+            maximumAge: 60000
+        };
+        
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const newPosition = {
@@ -622,6 +636,11 @@ const UIManager = {
                 
                 // 更新地图
                 MapManager.updatePlayerMarkers();
+                
+                // 如果是猫，将地图中心定位到猫的位置
+                if (GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.CAT) {
+                    MapManager.locateToCurrentPlayer();
+                }
             },
             (error) => {
                 console.error('获取位置失败:', error);
@@ -632,20 +651,43 @@ const UIManager = {
                         errorMessage = '位置服务被拒绝，请允许浏览器访问位置信息';
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        errorMessage = '无法获取位置信息';
+                        errorMessage = '无法获取位置信息，请检查设备定位功能';
                         break;
                     case error.TIMEOUT:
-                        errorMessage = '获取位置信息超时';
+                        errorMessage = '获取位置信息超时，请重试';
+                        // 如果是超时错误，可以尝试再次获取
+                        setTimeout(() => {
+                            this.getPlayerLocation();
+                        }, 2000);
                         break;
                 }
                 
                 Utils.showNotification(errorMessage, 'error');
+                
+                // 使用默认位置作为后备
+                const defaultPosition = {
+                    latitude: 39.90923,
+                    longitude: 116.397428,
+                    accuracy: 1000
+                };
+                
+                GameStateManager.currentPlayer.position = defaultPosition;
+                
+                // 发送默认位置
+                if (!GameStateManager.currentPlayer.isHost) {
+                    PeerConnectionManager.sendToHost({
+                        type: 'playerPosition',
+                        playerId: GameStateManager.currentPlayer.id,
+                        position: defaultPosition
+                    });
+                } else {
+                    GameStateManager.updatePlayer(GameStateManager.currentPlayer.id, { position: defaultPosition });
+                }
+                
+                // 更新地图
+                MapManager.updatePlayerMarkers();
             },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 60000
-            }
+            options
         );
     },
     
@@ -700,6 +742,14 @@ const UIManager = {
     
     onRoleAssigned: function(data) {
         console.log('角色分配:', data.catPlayerId);
+        
+        // 更新当前玩家的角色
+        if (data.catPlayerId === GameStateManager.currentPlayer.id) {
+            GameStateManager.currentPlayer.role = GameStateManager.PlayerRole.CAT;
+        } else {
+            GameStateManager.currentPlayer.role = GameStateManager.PlayerRole.MOUSE;
+        }
+        
         Utils.showNotification('角色已分配', 'info');
         this.updatePlayersList();
     },
