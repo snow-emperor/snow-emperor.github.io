@@ -375,4 +375,405 @@ const UIManager = {
             const playerElement = document.createElement('div');
             let playerActions = '';
             
-            // 如果是猫，并且当前玩家也是猫，并且有老鼠请求被抓，显示"抓住了
+            // 如果是猫，并且当前玩家也是猫，并且有老鼠请求被抓，显示"抓住了"按钮
+            if (GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.CAT && 
+                player.role === GameStateManager.PlayerRole.MOUSE && 
+                !player.isCaught && 
+                player.requestingCatch) {
+                playerActions = `
+                    <div class="player-actions">
+                        <button class="btn-secondary catch-btn" data-player-id="${playerId}">
+                            <i class="fas fa-hand-paper"></i> 抓住了
+                        </button>
+                    </div>
+                `;
+            }
+            
+            const roleIcon = player.role === GameStateManager.PlayerRole.CAT ? 
+                '<i class="fas fa-cat role-icon role-cat"></i>' : 
+                '<i class="fas fa-mouse role-icon role-mouse"></i>';
+            
+            let statusText = '';
+            if (player.isCaught) {
+                statusText = '<span style="color: #f44336;"><i class="fas fa-skull-crossbones"></i> 已抓住</span>';
+            } else if (player.requestingCatch) {
+                statusText = '<span style="color: #ff9800;"><i class="fas fa-hand-paper"></i> 请求被抓</span>';
+            }
+            
+            playerElement.className = `player ${player.role} ${player.isCaught ? 'caught' : ''} ${player.requestingCatch ? 'requesting-catch' : ''}`;
+            playerElement.innerHTML = `
+                <span>${player.name}</span>
+                <div>
+                    <span>${roleIcon} ${GameStateManager.getRoleText(player.role)} ${statusText}</span>
+                    ${playerActions}
+                </div>
+            `;
+            this.elements.gamePlayersContainer.appendChild(playerElement);
+        }
+        
+        // 为抓住了按钮添加事件监听
+        document.querySelectorAll('.catch-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const playerId = e.target.closest('.catch-btn').getAttribute('data-player-id');
+                this.confirmCatch(playerId);
+            });
+        });
+    },
+    
+    // 确认抓住
+    confirmCatch: function(playerId) {
+        if (GameStateManager.currentPlayer.role !== GameStateManager.PlayerRole.CAT) return;
+        
+        PeerConnectionManager.sendToHost({
+            type: 'playerCaught',
+            playerId: playerId,
+            catPlayerId: GameStateManager.currentPlayer.id
+        });
+    },
+    
+    // 更新游戏界面
+    updateGameInterface: function() {
+        // 更新游戏状态文本
+        if (GameStateManager.currentState === GameStateManager.GameState.HIDING) {
+            this.elements.gameStateText.textContent = '躲藏阶段';
+            this.elements.statusMessage.textContent = '尽快找到躲藏的地方！';
+            this.elements.statusMessage.className = 'status-message status-hiding';
+            
+            // 如果是猫，显示提示
+            if (GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.CAT) {
+                this.elements.statusMessage.textContent = '你是猫，等待躲藏时间结束后开始寻找老鼠！';
+            }
+        } else if (GameStateManager.currentState === GameStateManager.GameState.SEEKING) {
+            this.elements.gameStateText.textContent = '寻找阶段';
+            this.elements.statusMessage.textContent = '猫正在寻找老鼠！';
+            this.elements.statusMessage.className = 'status-message status-seeking';
+            
+            // 根据角色显示不同提示
+            if (GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.CAT) {
+                this.elements.statusMessage.textContent = '你是猫，快去抓住老鼠！';
+            } else if (GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.MOUSE) {
+                this.elements.statusMessage.textContent = '你是老鼠，小心不要被猫抓住！';
+            }
+        }
+        
+        // 更新角色显示
+        const roleIcon = GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.CAT ? 
+            '<i class="fas fa-cat role-icon role-cat"></i>' : 
+            '<i class="fas fa-mouse role-icon role-mouse"></i>';
+        this.elements.playerRole.innerHTML = `${roleIcon} ${GameStateManager.getRoleText(GameStateManager.currentPlayer.role)}`;
+        
+        // 更新扫描次数显示
+        this.updateScanCountDisplay();
+        
+        // 更新玩家列表
+        this.updateGamePlayersList();
+        
+        // 更新地图可见性
+        MapManager.updateMapVisibility();
+        
+        // 根据角色显示/隐藏被抓按钮
+        if (GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.MOUSE && 
+            !GameStateManager.currentPlayer.isCaught) {
+            this.elements.caughtBtn.style.display = 'block';
+            if (GameStateManager.currentPlayer.requestingCatch) {
+                this.elements.caughtBtn.innerHTML = '<i class="fas fa-times"></i> 取消被抓请求';
+                this.elements.caughtBtn.className = 'btn-secondary';
+            } else {
+                this.elements.caughtBtn.innerHTML = '<i class="fas fa-hand-paper"></i> 我被抓住了';
+                this.elements.caughtBtn.className = 'btn-caught';
+            }
+        } else {
+            this.elements.caughtBtn.style.display = 'none';
+        }
+    },
+    
+    // 更新扫描次数显示
+    updateScanCountDisplay: function() {
+        this.elements.scanCountDisplay.textContent = 
+            `${GameStateManager.config.scansRemaining}/${GameStateManager.config.scanCount}`;
+    },
+    
+    // 开始游戏计时器
+    startGameTimer: function() {
+        GameStateManager.resetTimers();
+        
+        const startTime = Date.now();
+        const hideTimeMs = GameStateManager.config.hideTime * 60 * 1000;
+        
+        GameStateManager.timers.gameTimer = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const remaining = hideTimeMs - elapsed;
+            
+            if (remaining <= 0) {
+                // 躲藏时间结束，切换到寻找阶段
+                GameStateManager.currentState = GameStateManager.GameState.SEEKING;
+                this.updateGameInterface();
+                
+                // 开始位置更新计时器
+                this.startLocationUpdateTimer();
+                
+                clearInterval(GameStateManager.timers.gameTimer);
+                this.elements.timerDisplay.textContent = '00:00';
+                
+                Utils.showNotification('躲藏时间结束！猫开始寻找老鼠！', 'warning');
+            } else {
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                this.elements.timerDisplay.textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }, 1000);
+    },
+    
+    // 开始位置更新计时器
+    startLocationUpdateTimer: function() {
+        GameStateManager.timers.locationUpdateTimer = setInterval(() => {
+            // 更新自己的位置
+            this.getPlayerLocation();
+            
+            // 如果还有扫描次数，广播老鼠位置给所有玩家
+            if (GameStateManager.currentPlayer.isHost && GameStateManager.config.scansRemaining > 0) {
+                this.broadcastMousePositions();
+                
+                // 减少扫描次数
+                GameStateManager.config.scansRemaining--;
+                this.updateScanCountDisplay();
+                
+                // 广播扫描次数更新
+                PeerConnectionManager.broadcast({
+                    type: 'scanUpdate',
+                    scansRemaining: GameStateManager.config.scansRemaining
+                });
+                
+                Utils.showNotification(`扫描完成！剩余扫描次数: ${GameStateManager.config.scansRemaining}`, 'info');
+                
+                // 设置定时器停止显示老鼠位置
+                clearTimeout(GameStateManager.timers.locationDisplayTimer);
+                GameStateManager.timers.locationDisplayTimer = setTimeout(() => {
+                    // 停止显示老鼠位置
+                    // 在实际实现中，这里应该清除老鼠的位置显示
+                }, GameStateManager.config.locationDuration * 1000);
+            }
+            
+            // 如果没有扫描次数了，停止计时器
+            if (GameStateManager.config.scansRemaining <= 0) {
+                clearInterval(GameStateManager.timers.locationUpdateTimer);
+                Utils.showNotification('所有扫描次数已用完！', 'warning');
+            }
+        }, GameStateManager.config.locationInterval * 60 * 1000);
+    },
+    
+    // 广播老鼠位置
+    broadcastMousePositions: function() {
+        if (!GameStateManager.currentPlayer.isHost) return;
+        
+        for (const playerId in GameStateManager.players) {
+            if (GameStateManager.players[playerId].role === GameStateManager.PlayerRole.MOUSE && 
+                !GameStateManager.players[playerId].isCaught && 
+                GameStateManager.players[playerId].position) {
+                PeerConnectionManager.broadcast({
+                    type: 'playerPosition',
+                    playerId: playerId,
+                    position: GameStateManager.players[playerId].position,
+                    role: GameStateManager.PlayerRole.MOUSE
+                });
+            }
+        }
+    },
+    
+    // 获取玩家位置
+    getPlayerLocation: function() {
+        if (!navigator.geolocation) {
+            Utils.showNotification('你的浏览器不支持地理定位', 'error');
+            return;
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const newPosition = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy
+                };
+                
+                GameStateManager.currentPlayer.position = newPosition;
+                
+                // 发送位置给房主
+                if (!GameStateManager.currentPlayer.isHost) {
+                    PeerConnectionManager.sendToHost({
+                        type: 'playerPosition',
+                        playerId: GameStateManager.currentPlayer.id,
+                        position: newPosition
+                    });
+                } else {
+                    // 房主更新自己的位置
+                    GameStateManager.updatePlayer(GameStateManager.currentPlayer.id, { position: newPosition });
+                    
+                    // 如果是猫，广播位置
+                    if (GameStateManager.currentPlayer.role === GameStateManager.PlayerRole.CAT) {
+                        PeerConnectionManager.broadcast({
+                            type: 'playerPosition',
+                            playerId: GameStateManager.currentPlayer.id,
+                            position: newPosition,
+                            role: GameStateManager.PlayerRole.CAT
+                        });
+                    }
+                }
+                
+                // 更新地图
+                MapManager.updatePlayerMarkers();
+            },
+            (error) => {
+                console.error('获取位置失败:', error);
+                let errorMessage = '无法获取你的位置';
+                
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = '位置服务被拒绝，请允许浏览器访问位置信息';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = '无法获取位置信息';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = '获取位置信息超时';
+                        break;
+                }
+                
+                Utils.showNotification(errorMessage, 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            }
+        );
+    },
+    
+    // Peer连接事件处理
+    onPeerOpen: function(data) {
+        console.log('Peer连接已建立:', data.id);
+    },
+    
+    onPeerError: function(data) {
+        console.error('Peer连接错误:', data.error);
+    },
+    
+    onConnectionOpen: function(data) {
+        console.log('连接已建立:', data.connection.peer);
+    },
+    
+    onPlayerJoined: function(data) {
+        console.log('玩家加入:', data.player.name);
+        Utils.showNotification(`玩家 ${data.player.name} 加入了房间`, 'info');
+        this.updatePlayersList();
+    },
+    
+    onPlayerLeft: function(data) {
+        console.log('玩家离开:', data.playerId);
+        Utils.showNotification('有玩家离开了房间', 'warning');
+        this.updatePlayersList();
+    },
+    
+    onHostDisconnected: function() {
+        Utils.showNotification('房主已断开连接，返回主界面', 'error');
+        this.switchPhase(GameStateManager.GameState.SETUP);
+        GameStateManager.resetGame();
+    },
+    
+    onGameStateUpdated: function(data) {
+        console.log('游戏状态更新:', data.state);
+        
+        if (data.state === GameStateManager.GameState.LOBBY) {
+            this.switchPhase(GameStateManager.GameState.LOBBY);
+            this.updatePlayersList();
+        }
+    },
+    
+    onPlayersUpdated: function(data) {
+        this.updatePlayersList();
+    },
+    
+    onPlayerReadyChanged: function(data) {
+        console.log('玩家准备状态改变:', data.playerId, data.isReady);
+        this.updatePlayersList();
+    },
+    
+    onRoleAssigned: function(data) {
+        console.log('角色分配:', data.catPlayerId);
+        Utils.showNotification('角色已分配', 'info');
+        this.updatePlayersList();
+    },
+    
+    onGameStarted: function(data) {
+        console.log('游戏开始');
+        GameStateManager.currentState = data.state;
+        GameStateManager.players = data.players;
+        GameStateManager.config = data.config;
+        
+        // 更新自己的角色
+        if (GameStateManager.players[GameStateManager.currentPlayer.id]) {
+            GameStateManager.currentPlayer.role = GameStateManager.players[GameStateManager.currentPlayer.id].role;
+            GameStateManager.currentPlayer.isCaught = GameStateManager.players[GameStateManager.currentPlayer.id].isCaught;
+            GameStateManager.currentPlayer.requestingCatch = GameStateManager.players[GameStateManager.currentPlayer.id].requestingCatch;
+        }
+        
+        // 获取玩家位置
+        this.getPlayerLocation();
+        
+        // 开始游戏计时
+        this.startGameTimer();
+        
+        // 切换到游戏界面
+        this.switchPhase(GameStateManager.GameState.HIDING);
+        this.updateGameInterface();
+    },
+    
+    onPlayerPositionUpdated: function(data) {
+        MapManager.updatePlayerMarkers();
+    },
+    
+    onPlayerRequestedCatch: function(data) {
+        this.updateGamePlayersList();
+    },
+    
+    onPlayerCanceledCatch: function(data) {
+        this.updateGamePlayersList();
+    },
+    
+    onPlayerCaught: function(data) {
+        if (data.isSelf) {
+            Utils.showNotification('你已被抓住，现在你也是猫了！', 'info');
+        }
+        this.updateGameInterface();
+    },
+    
+    onScanCountUpdated: function(data) {
+        this.updateScanCountDisplay();
+    },
+    
+    onGameOver: function(data) {
+        Utils.showNotification('游戏结束！' + data.message, 'success');
+        this.switchPhase(GameStateManager.GameState.LOBBY);
+        GameStateManager.resetGameState();
+        this.updatePlayersList();
+    },
+    
+    onBackToLobby: function() {
+        this.switchPhase(GameStateManager.GameState.LOBBY);
+        GameStateManager.resetGameState();
+        this.updatePlayersList();
+        Utils.showNotification('游戏已结束，返回大厅', 'info');
+    },
+    
+    onCatAssigned: function(data) {
+        this.updatePlayersList();
+    },
+    
+    onPlayerCaughtByHost: function(data) {
+        this.updatePlayersList();
+        this.updateGamePlayersList();
+    }
+};
+
+// 导出到全局作用域
+window.UIManager = UIManager;
