@@ -317,7 +317,15 @@ const UIManager = {
     
     // 更新玩家列表
     updatePlayersList: function() {
+        console.log('更新玩家列表，当前玩家数:', Object.keys(GameStateManager.players).length);
+        console.log('玩家数据:', GameStateManager.players);
+        
         this.elements.playersContainer.innerHTML = '';
+        
+        // 确保当前玩家在列表中
+        if (!GameStateManager.players[GameStateManager.currentPlayer.id]) {
+            GameStateManager.addPlayer(GameStateManager.currentPlayer.id, { ...GameStateManager.currentPlayer });
+        }
         
         for (const playerId in GameStateManager.players) {
             const player = GameStateManager.players[playerId];
@@ -732,6 +740,14 @@ const UIManager = {
     },
     
     onPlayersUpdated: function(data) {
+        console.log('玩家列表更新，接收到的玩家数据:', data.players);
+        
+        // 确保当前玩家在列表中
+        if (!data.players[GameStateManager.currentPlayer.id]) {
+            data.players[GameStateManager.currentPlayer.id] = { ...GameStateManager.currentPlayer };
+        }
+        
+        GameStateManager.players = data.players;
         this.updatePlayersList();
     },
     
