@@ -414,7 +414,7 @@ const PeerConnectionManager = {
     assignCatToPlayer: function(catPlayerId) {
         if (!GameStateManager.currentPlayer.isHost) return;
         
-        // 重置所有玩家角色
+        // 重置所有玩家角色为老鼠
         for (const playerId in GameStateManager.players) {
             GameStateManager.updatePlayer(playerId, { role: GameStateManager.PlayerRole.MOUSE });
         }
@@ -422,7 +422,7 @@ const PeerConnectionManager = {
         // 设置猫
         GameStateManager.updatePlayer(catPlayerId, { role: GameStateManager.PlayerRole.CAT });
         
-        // 如果是房主自己，也更新当前玩家的角色
+        // 更新当前玩家的角色（如果是房主自己）
         if (catPlayerId === GameStateManager.currentPlayer.id) {
             GameStateManager.currentPlayer.role = GameStateManager.PlayerRole.CAT;
         }
@@ -435,6 +435,9 @@ const PeerConnectionManager = {
         
         // 触发自定义事件
         this.triggerEvent('catAssigned', { catPlayerId: catPlayerId });
+        
+        // 更新UI
+        UIManager.updatePlayersList();
     },
     
     // 发送消息给房主
@@ -452,7 +455,7 @@ const PeerConnectionManager = {
     // 广播消息给所有玩家
     broadcast: function(message) {
         for (const connId in this.connections) {
-            this.connections[connId].send(message);
+            connections[connId].send(message);
         }
     },
     
