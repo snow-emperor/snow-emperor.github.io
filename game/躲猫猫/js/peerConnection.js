@@ -174,6 +174,7 @@ const PeerConnectionManager = {
     },
     
     handlePlayersUpdate: function(data, conn) {
+        console.log('处理玩家列表更新，玩家数量:', Object.keys(data.players).length);
         GameStateManager.players = data.players;
         
         // 触发自定义事件
@@ -455,7 +456,7 @@ const PeerConnectionManager = {
     // 广播消息给所有玩家
     broadcast: function(message) {
         for (const connId in this.connections) {
-            connections[connId].send(message);
+            this.connections[connId].send(message);
         }
     },
     
