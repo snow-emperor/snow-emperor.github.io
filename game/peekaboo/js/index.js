@@ -21,6 +21,10 @@ class PeekabooGameIndex {
 
     async init() {
         // 初始化事件监听器
+        document.getElementById('generate-peer-id').addEventListener('click', () => {
+            this.generatePeerIdAndInitializeNetwork();
+        });
+
         document.getElementById('copy-peer-id').addEventListener('click', () => {
             this.copyPeerId();
         });
@@ -67,6 +71,63 @@ class PeekabooGameIndex {
         };
 
         this.updatePlayerList();
+    }
+
+    async generatePeerIdAndInitializeNetwork() {
+        if (!this.localPlayer.name) {
+            this.showMessage('请先输入玩家昵称', 'warning');
+            return;
+        }
+
+        // 防止重复初始化
+        if (this.networkInitialized) {
+            return;
+        }
+
+        try {
+            // 生成peerId
+            const peerId = this.generatePeerId(this.localPlayer.name);
+            this.localPlayer.id = peerId;
+            this.networkInitialized = true;
+            
+            // 初始化PeerJS
+            this.peer = new Peer(peerId, {
+                host: '0.peerjs.com',
+                port: 443,
+                path: '/',
+                secure: true,
+                debug: 2
+            });
+            
+            this.peer.on('open', (id) => {
+                console.log('My peer ID is: ' + id);
+                document.getElementById('peer-id').value = id;
+                this.updatePlayerList();
+                this.checkStartConditions();
+                this.showMessage('网络连接已建立', 'success');
+            });
+            
+            this.peer.on('connection', (conn) => {
+                this.handleIncomingConnection(conn);
+            });
+            
+            this.peer.on('error', (err) => {
+                console.error('PeerJS error:', err);
+                // 如果ID被占用，提示用户但不自动生成新ID
+                if (err.type === 'unavailable-id' || (err.message && err.message.includes('ID "'))) {
+                    this.showMessage('ID已被占用，请关闭其他使用相同ID的页面或重新开始游戏', 'error');
+                } else {
+                    this.showMessage('P2P网络错误: ' + err.message, 'error');
+                }
+            });
+        } catch (error) {
+            console.error('网络初始化失败:', error);
+            this.showMessage('网络初始化失败: ' + error.message + 
+                  '\n\n可能的原因:' +
+                  '\n1. 网络连接问题' +
+                  '\n2. PeerJS服务器不可用' +
+                  '\n3. 防火墙阻止了连接', 'error');
+        }
     }
 
     async initializeNetwork() {
@@ -406,7 +467,7 @@ class PeekabooGameIndex {
         }
 
         if (!this.peer || !this.networkInitialized) {
-            this.showMessage('请先输入昵称并生成自己的 Peer ID', 'warning');
+            this.showMessage('请先生成自己的 Peer ID', 'warning');
             return;
         }
 
@@ -433,11 +494,7 @@ class PeekabooGameIndex {
     updatePlayerName(name) {
         this.localPlayer.name = name;
         
-        // 如果有名字且网络未初始化，则初始化网络
-        if (name && !this.networkInitialized) {
-            this.initializeNetwork();
-        }
-        
+        // 只更新玩家列表和检查开始条件
         this.updatePlayerList();
         this.checkStartConditions();
     }
@@ -786,6 +843,7 @@ class PeekabooGameIndex {
         const allReady = allPlayers.length >= 2 && allPlayers.every(player => player.isReady);
         const minPlayers = allPlayers.length >= 2;
         
+        document.getElementById('generate-peer-id').disabled = !hasName || this.networkInitialized;
         document.getElementById('ready-btn').disabled = !hasName || !this.peer || !this.networkInitialized || !!this.localPlayer.isReady;
         document.getElementById('start-game').disabled = !(hasName && hasCat && allReady && minPlayers);
     }
