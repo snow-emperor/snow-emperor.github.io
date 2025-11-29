@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peekaboo Game</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入高德地图API -->
+    <script type="text/javascript" 
+            src="https://webapi.amap.com/maps?v=1.4.15&key=ea4fdf391df59379e2e64cba9fabcb51"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Peekaboo Game</h1>
+        
+        <div class="players-info">
+            <div class="players-header">
+                <h2>玩家状态</h2>
+                <button id="refresh-status" class="refresh-btn">🔄 刷新</button>
+            </div>
+            <ul id="players-status"></ul>
+        </div>
+        
+        <!-- 猫专属UI -->
+        <div id="cat-ui" class="hidden">
+            <div class="section">
+                <h2>地图</h2>
+                <div id="map-container"></div>
+            </div>
+            
+            <div class="section">
+                <h2>扫描控制</h2>
+                <button id="scan-btn" disabled>扫描</button>
+                <span id="scan-timer"></span>
+                <span id="cooldown-timer"></span>
+            </div>
+            
+            <div class="section">
+                <h2>抓捕</h2>
+                <select id="target-select">
+                    <option value="">选择要抓捕的老鼠</option>
+                </select>
+                <button id="catch-btn">发送抓捕请求</button>
+            </div>
+        </div>
+        
+        <!-- 老鼠专属UI -->
+        <div id="mouse-ui" class="hidden">
+            <div class="section">
+                <h2>状态</h2>
+                <p>您是老鼠，请找地方躲藏！</p>
+            </div>
+        </div>
+        
+        <!-- 抓捕确认框 -->
+        <div id="catch-confirm" class="modal hidden" style="display:none;">
+            <div class="modal-content">
+                <h2>被抓到了!</h2>
+                <p>🐱 抓住了你! 是否确认被抓?</p>
+                <button id="confirm-catch">确认被抓</button>
+                <button id="deny-catch">否认</button>
+            </div>
+        </div>
+        
+        <!-- 游戏阶段信息 -->
+        <div class="section">
+            <h2>游戏状态</h2>
+            <p id="game-phase">躲藏阶段</p>
+            <p id="phase-timer"></p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
