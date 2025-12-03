@@ -6,260 +6,38 @@
     <title>游戏中心 - 发现精彩游戏</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            padding: 30px 0;
-            margin-bottom: 30px;
-        }
-        
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, #ff7e5f, #feb47b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            color: #a0a0c0;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .category-filter {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .category-btn {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 30px;
-            color: #c0c0d0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .category-btn.active, .category-btn:hover {
-            background: linear-gradient(90deg, #ff7e5f, #feb47b);
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        .search-box {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-        
-        .search-input {
-            padding: 12px 20px;
-            width: 100%;
-            max-width: 500px;
-            border-radius: 30px;
-            border: none;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-        
-        .search-input:focus {
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 0 2px rgba(255, 126, 95, 0.5);
-        }
-        
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            padding: 20px 0;
-        }
-        
-        .game-card {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            position: relative;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        .game-card.hidden {
-            display: none;
-        }
-        
-        .game-card.fade-out {
-            opacity: 0;
-            transform: scale(0.9);
-        }
-        
-        .game-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-            background: rgba(255, 255, 255, 0.12);
-        }
-        
-        .game-image {
-            height: 180px;
-            width: 100%;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-        
-        .game-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
-            display: flex;
-            align-items: flex-end;
-            padding: 15px;
-        }
-        
-        .game-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: white;
-        }
-        
-        .game-content {
-            padding: 20px;
-        }
-        
-        .game-description {
-            color: #c0c0d0;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 20px;
-            height: 70px;
-            overflow: hidden;
-        }
-        
-        .game-meta {
-            display: flex;
-            justify-content: space-between;
-            color: #a0a0c0;
-            font-size: 0.85rem;
-            margin-bottom: 20px;
-        }
-        
-        .game-tag {
-            display: inline-block;
-            background: rgba(255, 126, 95, 0.2);
-            color: #ff7e5f;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            margin-top: 5px;
-        }
-        
-        .game-play {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(90deg, #ff7e5f, #feb47b);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            text-decoration: none;
-        }
-        
-        .game-play:hover {
-            background: linear-gradient(90deg, #ff6b4a, #fd9f6c);
-            box-shadow: 0 5px 15px rgba(255, 126, 95, 0.4);
-            transform: translateY(-2px);
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 50px 20px;
-            color: #a0a0c0;
-            grid-column: 1 / -1;
-        }
-        
-        .no-results i {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            color: #ff7e5f;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 50px;
-            padding: 20px;
-            color: #a0a0c0;
-            font-size: 0.9rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        @media (max-width: 768px) {
-            .games-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 20px;
-            }
-            
-            h1 {
-                font-size: 2.5rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .games-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .category-filter {
-                gap: 10px;
-            }
-            
-            .category-btn {
-                padding: 8px 15px;
-                font-size: 0.9rem;
-            }
-        }
+        /* ===== 通用样式 ===== */
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+        body{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);color:#fff;min-height:100vh;padding:20px}
+        .container{max-width:1200px;margin:0 auto}
+        header{text-align:center;padding:30px 0;margin-bottom:30px}
+        h1{font-size:3rem;margin-bottom:10px;background:linear-gradient(90deg,#ff7e5f,#feb47b);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 2px 10px rgba(0,0,0,.2)}
+        .subtitle{font-size:1.2rem;color:#a0a0c0;max-width:600px;margin:0 auto}
+        .search-box{display:flex;justify-content:center;margin-bottom:30px}
+        .search-input{padding:12px 20px;width:100%;max-width:500px;border-radius:30px;border:none;background:rgba(255,255,255,.1);color:#fff;font-size:1rem;outline:none;transition:all .3s ease}
+        .search-input:focus{background:rgba(255,255,255,.15);box-shadow:0 0 0 2px rgba(255,126,95,.5)}
+        .category-filter{display:flex;justify-content:center;flex-wrap:wrap;gap:15px;margin-bottom:30px}
+        .category-btn{padding:10px 20px;background:rgba(255,255,255,.1);border:none;border-radius:30px;color:#c0c0d0;cursor:pointer;transition:all .3s ease}
+        .category-btn.active,.category-btn:hover{background:linear-gradient(90deg,#ff7e5f,#feb47b);color:#fff;transform:translateY(-2px)}
+        .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:25px;padding:20px 0}
+        .game-card{background:rgba(255,255,255,.08);border-radius:15px;overflow:hidden;box-shadow:0 10px 20px rgba(0,0,0,.3);transition:all .3s ease;position:relative;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);opacity:1;transform:scale(1)}
+        .game-card.hidden{display:none}
+        .game-card.fade-out{opacity:0;transform:scale(.9)}
+        .game-card:hover{transform:translateY(-10px) scale(1.02);box-shadow:0 15px 30px rgba(0,0,0,.4);background:rgba(255,255,255,.12)}
+        .game-image{height:180px;width:100%;background-size:cover;background-position:center;position:relative}
+        .game-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.7) 100%);display:flex;align-items:flex-end;padding:15px}
+        .game-title{font-size:1.4rem;font-weight:600;color:#fff}
+        .game-content{padding:20px}
+        .game-description{color:#c0c0d0;font-size:.95rem;line-height:1.5;margin-bottom:20px;height:70px;overflow:hidden}
+        .game-meta{display:flex;justify-content:space-between;color:#a0a0c0;font-size:.85rem;margin-bottom:20px}
+        .game-tag{display:inline-block;background:rgba(255,126,95,.2);color:#ff7e5f;padding:4px 10px;border-radius:20px;font-size:.75rem;margin-top:5px}
+        .game-play{display:block;width:100%;padding:12px;background:linear-gradient(90deg,#ff7e5f,#feb47b);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:all .3s ease;text-align:center;text-decoration:none}
+        .game-play:hover{background:linear-gradient(90deg,#ff6b4a,#fd9f6c);box-shadow:0 5px 15px rgba(255,126,95,.4);transform:translateY(-2px)}
+        .no-results{text-align:center;padding:50px 20px;color:#a0a0c0;grid-column:1/-1}
+        .no-results i{font-size:3rem;margin-bottom:20px;color:#ff7e5f}
+        footer{text-align:center;margin-top:50px;padding:20px;color:#a0a0c0;font-size:.9rem;border-top:1px solid rgba(255,255,255,.1)}
+        @media(max-width:768px){.games-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}h1{font-size:2.5rem}}
+        @media(max-width:480px){.games-grid{grid-template-columns:1fr}h1{font-size:2rem}.category-filter{gap:10px}.category-btn{padding:8px 15px;font-size:.9rem}}
     </style>
 </head>
 <body>
@@ -268,244 +46,202 @@
             <h1>游戏中心</h1>
             <p class="subtitle">探索精彩游戏世界，点击卡片开始游玩！</p>
         </header>
-        
+
         <div class="search-box">
             <input type="text" class="search-input" placeholder="搜索游戏名称或描述...">
         </div>
-        
+
         <div class="category-filter">
             <button class="category-btn active" data-filter="all">全部游戏</button>
-            <button class="category-btn" data-filter="action">动作冒险</button>
-            <button class="category-btn" data-filter="strategy">策略游戏</button>
-            <button class="category-btn" data-filter="rpg">角色扮演</button>
-            <button class="category-btn" data-filter="puzzle">休闲益智</button>
+            <button class="category-btn" data-filter="action">动作射击</button>
+            <button class="category-btn" data-filter="puzzle">益智休闲</button>
+            <button class="category-btn" data-filter="strategy">策略棋类</button>
             <button class="category-btn" data-filter="racing">赛车竞速</button>
         </div>
-        
+
         <div class="games-grid">
-            <!-- 游戏卡片 1 -->
-            <div class="game-card" data-categories="action" data-name="星际探险">
-                <div class="game-image" style="background-image: url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');">
-                    <div class="game-overlay">
-                        <h3 class="game-title">星际探险</h3>
-                    </div>
+            <!-- 1. 小行星射击 -->
+            <div class="game-card" data-categories="action" data-name="小行星">
+                <div class="game-image" style="background-image:url('https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?auto=format&fit=crop&w=800&q=60')">
+                    <div class="game-overlay"><h3 class="game-title">小行星射击</h3></div>
                 </div>
                 <div class="game-content">
-                    <p class="game-description">在浩瀚宇宙中探索未知星球，收集资源，建立基地，与外星生物互动。</p>
-                    <div class="game-meta">
-                        <span><i class="fas fa-user"></i> 1-4人</span>
-                        <span><i class="fas fa-clock"></i> 平均30分钟</span>
-                    </div>
-                    <span class="game-tag">动作冒险</span>
-                    <a href="Interstellar/index.html" class="game-play">开始游戏</a>
-                </div>
-            </div>
-            
-            <!-- 游戏卡片 2 -->
-            <div class="game-card" data-categories="rpg" data-name="魔法学院">
-                <div class="game-image" style="background-image: url('https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');">
-                    <div class="game-overlay">
-                        <h3 class="game-title">魔法学院</h3>
-                    </div>
-                </div>
-                <div class="game-content">
-                    <p class="game-description">进入魔法世界学习各种咒语，与同学竞争，成为最强大的魔法师。</p>
+                    <p class="game-description">驾驶飞船 360° 旋转开火，击碎来袭小行星，经典街机复刻。</p>
                     <div class="game-meta">
                         <span><i class="fas fa-user"></i> 单人</span>
-                        <span><i class="fas fa-clock"></i> 平均45分钟</span>
+                        <span><i class="fas fa-clock"></i> 随时开局</span>
                     </div>
-                    <span class="game-tag">角色扮演</span>
-                    <a href="magic_school/index.html" class="game-play">开发游戏</a>
+                    <span class="game-tag">动作射击</span>
+                    <a href="https://dmcinnes.github.io/HTML5-Asteroids/" target="_blank" class="game-play">开始游戏</a>
                 </div>
             </div>
-            
-            <!-- 游戏卡片 3 -->
-            <div class="game-card" data-categories="racing" data-name="赛车巅峰">
-                <div class="game-image" style="background-image: url('https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');">
-                    <div class="game-overlay">
-                        <h3 class="game-title">赛车巅峰</h3>
-                    </div>
+
+            <!-- 2. 星际战机 -->
+            <div class="game-card" data-categories="action" data-name="星际战机">
+                <div class="game-image" style="background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=60')">
+                    <div class="game-overlay"><h3 class="game-title">星际战机</h3></div>
                 </div>
                 <div class="game-content">
-                    <p class="game-description">驾驶高性能赛车在全球各地赛道竞速，升级你的车辆，赢得冠军。</p>
-                    <div class="game-meta">
-                        <span><i class="fas fa-user"></i> 1-8人</span>
-                        <span><i class="fas fa-clock"></i> 平均15分钟</span>
-                    </div>
-                    <span class="game-tag">赛车竞速</span>
-                    <a href="赛车/index.html" class="game-play">开发游戏</a>
-                </div>
-            </div>
-            
-            <!-- 游戏卡片 4 -->
-            <div class="game-card" data-categories="strategy" data-name="城市建造者">
-                <div class="game-image" style="background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');">
-                    <div class="game-overlay">
-                        <h3 class="game-title">城市建造者</h3>
-                    </div>
-                </div>
-                <div class="game-content">
-                    <p class="game-description">从零开始建设你的梦想城市，管理资源，平衡发展，应对各种挑战。</p>
+                    <p class="game-description">WASD 移动，空格开火，拾燃料瓶续命，看你能撑多久。</p>
                     <div class="game-meta">
                         <span><i class="fas fa-user"></i> 单人</span>
-                        <span><i class="fas fa-clock"></i> 平均60分钟</span>
+                        <span><i class="fas fa-clock"></i> 随时开局</span>
                     </div>
-                    <span class="game-tag">策略游戏</span>
-                    <a href="city_builder.html" class="game-play">开发游戏</a>
+                    <span class="game-tag">动作射击</span>
+                    <a href="https://4ark.me/star-battle/" target="_blank" class="game-play">开始游戏</a>
                 </div>
             </div>
-            
-            <!-- 游戏卡片 5 -->
-            <div class="game-card" data-categories="puzzle" data-name="解谜大师">
-                <div class="game-image" style="background-image: url('https://images.unsplash.com/photo-1542751110-97427bbecf20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');">
-                    <div class="game-overlay">
-                        <h3 class="game-title">解谜大师</h3>
-                    </div>
+
+            <!-- 3. 俄罗斯方块 -->
+            <div class="game-card" data-categories="puzzle" data-name="俄罗斯方块">
+                <div class="game-image" style="background-image:url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=60')">
+                    <div class="game-overlay"><h3 class="game-title">俄罗斯方块</h3></div>
                 </div>
                 <div class="game-content">
-                    <p class="game-description">挑战各种逻辑谜题和脑力游戏，锻炼你的思维能力，成为解谜大师。</p>
-                    <div class="game-meta">
-                        <span><i class="fas fa-user"></i> 1-2人</span>
-                        <span><i class="fas fa-clock"></i> 平均20分钟</span>
-                    </div>
-                    <span class="game-tag">休闲益智</span>
-                    <a href="puzzle_master.html" class="game-play">开发游戏</a>
-                </div>
-            </div>
-            
-            <!-- 游戏卡片 6 -->
-            <div class="game-card" data-categories="rpg" data-name="幻想RPG">
-                <div class="game-image" style="background-image: url('https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');">
-                    <div class="game-overlay">
-                        <h3 class="game-title">幻想RPG</h3>
-                    </div>
-                </div>
-                <div class="game-content">
-                    <p class="game-description">扮演英雄探索奇幻世界，完成任务，升级技能，与怪物战斗。</p>
-                    <div class="game-meta">
-                        <span><i class="fas fa-user"></i> 1-4人</span>
-                        <span><i class="fas fa-clock"></i> 平均90分钟</span>
-                    </div>
-                    <span class="game-tag">角色扮演</span>
-                    <a href="fantasy_rpg.html" class="game-play">开发游戏</a>
-                </div>
-            </div>
-            
-            <!-- 游戏卡片 7 -->
-            <div class="game-card" data-categories="action" data-name="忍者传说">
-                <div class="game-image" style="background-image: url('https://images.unsplash.com/photo-1542755162-ccd71c6d2d2f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');">
-                    <div class="game-overlay">
-                        <h3 class="game-title">忍者传说</h3>
-                    </div>
-                </div>
-                <div class="game-content">
-                    <p class="game-description">扮演忍者完成各种隐秘任务，学习忍术，击败敌人，成为传奇忍者。</p>
+                    <p class="game-description">像素级复刻，支持暂停、回放、排行榜，键盘/手势双适配。</p>
                     <div class="game-meta">
                         <span><i class="fas fa-user"></i> 单人</span>
-                        <span><i class="fas fa-clock"></i> 平均40分钟</span>
+                        <span><i class="fas fa-clock"></i> 随时开局</span>
                     </div>
-                    <span class="game-tag">动作冒险</span>
-                    <a href="ninja_legend.html" class="game-play">开发游戏</a>
+                    <span class="game-tag">益智休闲</span>
+                    <a href="https://chvin.github.io/react-tetris/" target="_blank" class="game-play">开始游戏</a>
                 </div>
             </div>
-            
-            <!-- 游戏卡片 8 -->
-            <div class="game-card" data-categories="strategy" data-name="帝国争霸">
-                <div class="game-image" style="background-image: url('https://images.unsplash.com/photo-1542751371-7e7d2c2c9c8d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');">
-                    <div class="game-overlay">
-                        <h3 class="game-title">帝国争霸</h3>
-                    </div>
+
+            <!-- 4. Hextris -->
+            <div class="game-card" data-categories="puzzle" data-name="Hextris">
+                <div class="game-image" style="background-image:url('https://images.unsplash.com/photo-1550684376-efcbd6e3f031?auto=format&fit=crop&w=800&q=60')">
+                    <div class="game-overlay"><h3 class="game-title">Hextris</h3></div>
                 </div>
                 <div class="game-content">
-                    <p class="game-description">建立你的帝国，训练军队，与其他玩家争夺资源和领土。</p>
+                    <p class="game-description">旋转六边形，让彩条落边消行，节奏极快，根本停不下来。</p>
+                    <div class="game-meta">
+                        <span><i class="fas fa-user"></i> 单人</span>
+                        <span><i class="fas fa-clock"></i> 随时开局</span>
+                    </div>
+                    <span class="game-tag">益智休闲</span>
+                    <a href="https://hextris.io/" target="_blank" class="game-play">开始游戏</a>
+                </div>
+            </div>
+
+            <!-- 5. PROXX 扫雷 -->
+            <div class="game-card" data-categories="puzzle" data-name="PROXX">
+                <div class="game-image" style="background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=60')">
+                    <div class="game-overlay"><h3 class="game-title">PROXX 扫雷</h3></div>
+                </div>
+                <div class="game-content">
+                    <p class="game-description">排除黑洞，数字提示周围黑洞数，支持黑暗主题，PWA 离线玩。</p>
+                    <div class="game-meta">
+                        <span><i class="fas fa-user"></i> 单人</span>
+                        <span><i class="fas fa-clock"></i> 随时开局</span>
+                    </div>
+                    <span class="game-tag">益智休闲</span>
+                    <a href="https://proxx.app/" target="_blank" class="game-play">开始游戏</a>
+                </div>
+            </div>
+
+            <!-- 6. 黑暗房间 -->
+            <div class="game-card" data-categories="strategy" data-name="黑暗房间">
+                <div class="game-image" style="background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=60')">
+                    <div class="game-overlay"><h3 class="game-title">黑暗房间</h3></div>
+                </div>
+                <div class="game-content">
+                    <p class="game-description">纯文字生存，添柴→探索→建造，极简却上头，已内置中文。</p>
+                    <div class="game-meta">
+                        <span><i class="fas fa-user"></i> 单人</span>
+                        <span><i class="fas fa-clock"></i> 随时开局</span>
+                    </div>
+                    <span class="game-tag">策略生存</span>
+                    <a href="https://adarkroom.doublespeakgames.com/?lang=zh_cn" target="_blank" class="game-play">开始游戏</a>
+                </div>
+            </div>
+
+            <!-- 7. Lichess 象棋 -->
+            <div class="game-card" data-categories="strategy" data-name="Lichess">
+                <div class="game-image" style="background-image:url('https://images.unsplash.com/photo-1528819622765-d6bcf132f793?auto=format&fit=crop&w=800&q=60')">
+                    <div class="game-overlay"><h3 class="game-title">Lichess 象棋</h3></div>
+                </div>
+                <div class="game-content">
+                    <p class="game-description">永远免费无广告，在线对战/人机/好友/观战/教学一站式。</p>
                     <div class="game-meta">
                         <span><i class="fas fa-user"></i> 1-多人</span>
-                        <span><i class="fas fa-clock"></i> 平均50分钟</span>
+                        <span><i class="fas fa-clock"></i> 随时开局</span>
                     </div>
-                    <span class="game-tag">策略游戏</span>
-                    <a href="empire_clash.html" class="game-play">开fa游戏</a>
+                    <span class="game-tag">策略棋类</span>
+                    <a href="https://lichess.org/zh" target="_blank" class="game-play">开始游戏</a>
+                </div>
+            </div>
+
+            <!-- 8. DOS 游戏合集 -->
+            <div class="game-card" data-categories="puzzle" data-name="DOS游戏">
+                <div class="game-image" style="background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=60')">
+                    <div class="game-overlay"><h3 class="game-title">DOS 游戏合集</h3></div>
+                </div>
+                <div class="game-content">
+                    <p class="game-description">1800+ 经典 DOS 游戏：仙剑、金庸群侠传、大富翁 2 等直接浏览器玩。</p>
+                    <div class="game-meta">
+                        <span><i class="fas fa-user"></i> 单人</span>
+                        <span><i class="fas fa-clock"></i> 随时开局</span>
+                    </div>
+                    <span class="game-tag">怀旧休闲</span>
+                    <a href="https://dos.zczc.cz/" target="_blank" class="game-play">开始游戏</a>
                 </div>
             </div>
         </div>
-        
+
         <div class="no-results hidden">
             <i class="fas fa-search"></i>
             <h3>未找到匹配的游戏</h3>
-            <p>尝试使用其他关键词或筛选条件</p>
+            <p>试试其他关键词或分类</p>
         </div>
-        
+
         <footer>
-            <p>© 2026 游戏中心 | 探索无限游戏世界</p>
+            <p>© 2026 游戏中心 | 所有游戏均开源/免费，托管于 GitHub / 作者官网</p>
         </footer>
     </div>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const categoryButtons = document.querySelectorAll('.category-btn');
-            const gameCards = document.querySelectorAll('.game-card');
-            const searchInput = document.querySelector('.search-input');
-            const noResults = document.querySelector('.no-results');
-            
-            // 类别筛选功能
-            categoryButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // 更新活动按钮
-                    categoryButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const filter = this.getAttribute('data-filter');
-                    filterGames(filter, searchInput.value);
+        /* ===== 筛选 & 搜索逻辑（与你原有代码 100% 兼容） ===== */
+        document.addEventListener('DOMContentLoaded',()=>{
+            const categoryButtons=document.querySelectorAll('.category-btn');
+            const gameCards=document.querySelectorAll('.game-card');
+            const searchInput=document.querySelector('.search-input');
+            const noResults=document.querySelector('.no-results');
+
+            categoryButtons.forEach(btn=>{
+                btn.addEventListener('click',()=>{
+                    categoryButtons.forEach(b=>b.classList.remove('active'));
+                    btn.classList.add('active');
+                    runFilter();
                 });
             });
-            
-            // 搜索功能
-            searchInput.addEventListener('input', function() {
-                const activeFilter = document.querySelector('.category-btn.active').getAttribute('data-filter');
-                filterGames(activeFilter, this.value);
-            });
-            
-            // 筛选游戏函数
-            function filterGames(category, searchTerm) {
-                let visibleCount = 0;
-                
-                gameCards.forEach(card => {
-                    const categories = card.getAttribute('data-categories');
-                    const name = card.getAttribute('data-name').toLowerCase();
-                    const description = card.querySelector('.game-description').textContent.toLowerCase();
-                    
-                    // 检查是否匹配类别
-                    const categoryMatch = category === 'all' || categories.includes(category);
-                    
-                    // 检查是否匹配搜索词
-                    const searchMatch = !searchTerm || 
-                        name.includes(searchTerm.toLowerCase()) || 
-                        description.includes(searchTerm.toLowerCase());
-                    
-                    // 显示或隐藏卡片
-                    if (categoryMatch && searchMatch) {
-                        card.classList.remove('hidden', 'fade-out');
-                        visibleCount++;
-                    } else {
+
+            searchInput.addEventListener('input',runFilter);
+
+            function runFilter(){
+                const active=document.querySelector('.category-btn.active').dataset.filter;
+                const kw=searchInput.value.trim().toLowerCase();
+                let visible=0;
+
+                gameCards.forEach(card=>{
+                    const cat=card.dataset.categories;
+                    const name=card.dataset.name.toLowerCase();
+                    const desc=card.querySelector('.game-description').textContent.toLowerCase();
+                    const matchCat=active==='all'||cat.includes(active);
+                    const matchKw=!kw||name.includes(kw)||desc.includes(kw);
+                    if(matchCat&&matchKw){
+                        card.classList.remove('hidden','fade-out');
+                        visible++;
+                    }else{
                         card.classList.add('fade-out');
-                        setTimeout(() => {
-                            card.classList.add('hidden');
-                        }, 300);
+                        setTimeout(()=>card.classList.add('hidden'),300);
                     }
                 });
-                
-                // 显示/隐藏"无结果"消息
-                if (visibleCount === 0) {
-                    noResults.classList.remove('hidden');
-                } else {
-                    noResults.classList.add('hidden');
-                }
+                noResults.classList.toggle('hidden',visible>0);
             }
-            
-            // 初始加载时显示所有游戏
-            filterGames('all', '');
+
+            runFilter(); // 初始显示全部
         });
     </script>
 </body>
-
 </html>
-
