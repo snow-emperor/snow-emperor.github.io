@@ -1,1 +1,154 @@
 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeerJS 赛车竞速 </title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #app-container {
+            width: 100%;
+            max-width: 900px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #controls, #player-status, #garage, #race-status {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        #game-canvas {
+            border: 2px solid #333;
+            background-color: #eee;
+            display: block;
+            width: 800px; /* 固定尺寸 */
+            height: 400px;
+        }
+        .status-badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; }
+        .status-connected { background-color: #d4edda; color: #155724; }
+        .status-disconnected { background-color: #f8d7da; color: #721c24; }
+        
+        /* 移动端按钮样式 */
+        .mobile-button {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.1s;
+        }
+        .mobile-button:active { background-color: #0056b3; }
+        .steering { width: 100px; }
+
+        @media (max-width: 840px) {
+            #game-canvas {
+                width: 100%; /* 在小屏幕上自适应宽度 */
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <h1>🏎️ PeerJS 赛车竞速 (P2P)</h1>
+
+        <div id="player-status">
+            <h2>💰 玩家数据 (Local Storage)</h2>
+            <p>当前余额: <strong id="credits-display">0</strong></p>
+            <p>车辆配置: <strong id="car-config-display">未加载</strong></p>
+            <button onclick="window.game.saveTestData()">初始化/保存测试数据</button>
+            <button onclick="window.game.addCredits(1000)">赢得比赛 (+1000 金币)</button>
+            <p><small>数据存储在您的浏览器 Local Storage 中。</small></p>
+            <hr>
+        </div>
+
+        <div id="garage">
+            <h2>🛠️ 我的车库与改装</h2>
+            <div id="modification-options">
+                <div style="border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
+                    <h4>引擎 (Engine)</h4>
+                    <p>当前等级: <strong id="current-engine-level">1</strong></p>
+                    <p>加速性能: <strong id="current-engine-perf">...</strong></p>
+                    <button onclick="window.game.upgradePart('engine')" id="engine-upgrade-button">
+                        升级到 Lv.<span id="next-engine-level">2</span> (花费: <span id="engine-upgrade-cost">1000</span>)
+                    </button>
+                </div>
+                
+                <div style="border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
+                    <h4>轮胎 (Tires)</h4>
+                    <p>当前等级: <strong id="current-tire-level">1</strong></p>
+                    <p>操控性能: <strong id="current-tire-perf">...</strong></p>
+                    <button onclick="window.game.upgradePart('tires')" id="tires-upgrade-button">
+                        升级到 Lv.<span id="next-tire-level">2</span> (花费: <span id="tires-upgrade-cost">500</span>)
+                    </button>
+                </div>
+                <p id="upgrade-message" style="color: red; margin-top: 10px;"></p>
+            </div>
+        </div>
+
+        <div id="controls">
+            <h2>🔗 PeerJS 联机控制</h2>
+            <p>您的 Peer ID: <strong id="my-peer-id" class="status-disconnected">...</strong></p>
+            <p>连接状态: <span id="connection-status" class="status-disconnected">断开</span></p>
+
+            <label for="remote-id">连接到远端 ID:</label>
+            <input type="text" id="remote-id" placeholder="输入对方的 Peer ID">
+            <button onclick="window.game.connectToPeer()">连接</button>
+            <hr>
+
+            <h3>P2P 消息测试</h3>
+            <input type="text" id="message-input" placeholder="输入消息">
+            <button onclick="window.game.sendMessage()">发送数据包</button>
+            <div id="messages-log"></div>
+        </div>
+        
+        <div id="race-status">
+            <h2>🏁 比赛状态</h2>
+            <p>比赛状态: <strong id="race-active-status">未开始</strong></p>
+            <p>我的圈数: <strong id="my-lap-count">0 / 3</strong> (最近检查点: <span id="my-checkpoint">准备区</span>)</p>
+            <p>对手圈数: <strong id="remote-lap-count">0 / 3</strong></p>
+            <button onclick="window.game.startRace()" id="start-race-button">开始比赛 (主机/房主)</button>
+        </div>
+        
+        <div id="game-container">
+            <h2>🎮 游戏画布</h2>
+            <canvas id="game-canvas" width="800" height="400"></canvas>
+            <p>主机 (房主) 状态同步:</p>
+            <div id="game-status-log"></div>
+        </div>
+
+        <div id="mobile-controls">
+            <h2>📱 移动端操控</h2>
+            <div>
+                <div id="btn-up" class="mobile-button">⬆️ 加速 (W)</div>
+                <div id="btn-down" class="mobile-button">⬇️ 刹车 (S)</div>
+            </div>
+            <div style="margin-top: 10px;">
+                <div id="btn-left" class="mobile-button steering">⬅️ 左转 (A)</div>
+                <div id="btn-right" class="mobile-button steering">➡️ 右转 (D)</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
